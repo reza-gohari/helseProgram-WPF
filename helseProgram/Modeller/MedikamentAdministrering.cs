@@ -23,4 +23,9 @@ public class MedikamentAdministrering
 
     public string Kommentar { get; set; } = string.Empty;
 
+    public Medikamenter Medikament { get; set;} = null!;
+
+    public PasientInfo Pasient { get; set;} = null!;
+
+    public SimSesjon SimSesjon { get; set;} = null!;
 }

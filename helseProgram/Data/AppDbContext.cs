@@ -30,5 +30,20 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<SimSesjon>()
             .HasKey(s => s.SimSesjonsId);
+
+        modelBuilder.Entity<MedikamentAdministrering>()
+            .HasOne(m => m.Medikament)
+            .WithMany()
+            .HasForeignKey(m => m.MedikamentId);
+
+        modelBuilder.Entity<MedikamentAdministrering>()
+            .HasOne(m => m.Pasient)
+            .WithMany()
+            .HasForeignKey(m => m.PasientId);
+
+        modelBuilder.Entity<MedikamentAdministrering>()
+            .HasOne(m => m.SimSesjon)
+            .WithMany()
+            .HasForeignKey(m => m.SimSesjonsId);
     }
 }
