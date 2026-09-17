@@ -4,5 +4,5 @@ public class Medikamenter
 {
     public int MedikamentId { get; set; }
 
-    public string MedikamentNavn {get; set; } = string.Empty;
+    public string MedikamentNavn { get; set; } = string.Empty;
 }

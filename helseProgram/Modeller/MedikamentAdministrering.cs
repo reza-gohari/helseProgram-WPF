@@ -1,7 +1,8 @@
 namespace helseProgram.Modeller;
+
 public class MedikamentAdministrering
 {
-    public int MedikamentAdministreringId { get; set;} // selvforklarende
+    public int MedikamentAdministreringId { get; set; } // selvforklarende
 
     public int MedikamentId { get; set; } // hvilke mediment som blir brukt
 
@@ -23,9 +24,9 @@ public class MedikamentAdministrering
 
     public string Kommentar { get; set; } = string.Empty;
 
-    public Medikamenter Medikament { get; set;} = null!;
+    public Medikamenter Medikament { get; set; } = null!;
 
-    public PasientInfo Pasient { get; set;} = null!;
+    public PasientInfo Pasient { get; set; } = null!;
 
-    public SimSesjon SimSesjon { get; set;} = null!;
+    public SimSesjon SimSesjon { get; set; } = null!;
 }

@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using helseProgram.Modeller;
+using Microsoft.EntityFrameworkCore;
 
 namespace helseProgram.Data;
 
