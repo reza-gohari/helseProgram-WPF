@@ -7,6 +7,68 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <StackPanel
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Width="390" Margin="10,10,0,0" Height="228">
+
+            <!-- Simulasjonstid -->
+            <TextBlock 
+                Text="Simulasjonstid"
+                HorizontalAlignment="Center"
+                FontSize="20"
+                Margin="0,0,0,10"/>
+
+            <TextBlock
+                x:Name="SimulasjonsTidText"
+                Text="00:00:00"
+                HorizontalAlignment="Center"
+                FontSize="40"
+                FontWeight="Bold"
+                Margin="0,0,0,20"/>
+
+            <!-- Tilstand -->
+            <TextBlock
+                x:Name="TilstandText"
+                Text="Ikke startet"
+                HorizontalAlignment="Center"
+                FontSize="18"
+                Margin="0,0,0,25"/>
+
+            <!-- Knapper -->
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Center">
+
+                <Button
+                    x:Name="StartKnapp"
+                    Content="Start"
+                    Width="100"
+                    Height="40"
+                    Margin="5"
+                    Click="StartKnapp_Click" Background="#FF34BD17"/>
+
+                <Button
+                    x:Name="PauseKnapp"
+                    Content="Pause"
+                    Width="100"
+                    Height="40"
+                    Margin="5"
+                    IsEnabled="False"
+                    Click="PauseKnapp_Click" Background="#FFD80D0D"/>
+
+                <Button
+                    x:Name="StoppKnapp"
+                    Content="Stopp"
+                    Width="100"
+                    Height="40"
+                    Margin="5"
+                    IsEnabled="False"
+                    Click="StoppKnapp_Click" Background="#FF9EE808"/>
+
+            </StackPanel>
+
+        </StackPanel>
 
     </Grid>
 </Window>
