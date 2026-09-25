@@ -1,0 +1,27 @@
+<Window x:Class="helseProgram.DoseRegistrationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Dose Registration" Height="450" Width="800">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+            <ComboBox x:Name="MedicationComboBox" Width="150" Margin="0,0,8,0" />
+            <ComboBox x:Name="DoseFormComboBox" Width="120" SelectionChanged="DoseFormComboBox_SelectionChanged" />
+            <TextBox x:Name="DoseTextBox" Width="60" PreviewTextInput="DoseTextBox_PreviewTextInput" PreviewKeyDown="DoseTextBox_PreviewKeyDown" PreviewMouseDown="DoseTextBox_PreviewMouseDown" Margin="8,0,8,0" />
+            <ComboBox x:Name="DoseUnitComboBox" Width="80" />
+            <TextBox x:Name="StartTimeTextBox" Width="70" />
+            <DatePicker x:Name="StartDatePicker" Width="120" />
+            <ComboBox x:Name="AdministrationRouteComboBox" Width="140" />
+            <TextBox x:Name="LocationTextBox" Width="120" />
+            <TextBox x:Name="CommentTextBox" Width="160" />
+            <Button x:Name="CreateDoseButton" Content="Create" Click="CreateDoseButton_Click" Margin="8,0,0,0" />
+            <Button x:Name="CloseButton" Content="Close" Click="CloseButton_Click" />
+        </StackPanel>
+
+        <DataGrid x:Name="RegisteredDosesGrid" Grid.Row="1" AutoGenerateColumns="True" />
+    </Grid>
+</Window>
