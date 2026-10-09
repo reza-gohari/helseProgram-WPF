@@ -1,5 +1,8 @@
 ﻿using System;
 
+
+///////////////// simen /////////////////
+
 namespace helseProgram.Simulering
 {
     public enum SimulasjonsTilstand
@@ -70,3 +73,6 @@ namespace helseProgram.Simulering
         }
     }
 }
+
+
+///////////////// simen /////////////////

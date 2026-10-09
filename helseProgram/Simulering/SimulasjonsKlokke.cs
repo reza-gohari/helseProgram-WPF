@@ -1,68 +1,49 @@
 ﻿using System;
+using System.Diagnostics;
+
+///////////////// simen /////////////////
 
 namespace helseProgram.Simulering
 {
     public class SimulasjonsKlokke
     {
-        private DateTime startTid;
-        private TimeSpan oppsamletTid = TimeSpan.Zero;
+        private readonly Stopwatch stoppeklokke = new Stopwatch();
 
-        private bool kjorer = false;
-
-        public TimeSpan SimulasjonsTid
-        {
-            get
-            {
-                if (kjorer)
-                {
-                    return oppsamletTid + (DateTime.Now - startTid);
-                }
-
-                return oppsamletTid;
-            }
-        }
+        public TimeSpan SimulasjonsTid => stoppeklokke.Elapsed;
 
         public void Start()
         {
-            if (kjorer)
+            if (stoppeklokke.IsRunning)
                 return;
 
-            startTid = DateTime.Now;
-            kjorer = true;
+            stoppeklokke.Start();
         }
 
         public void Pause()
         {
-            if (!kjorer)
+            if (!stoppeklokke.IsRunning)
                 return;
 
-            oppsamletTid += DateTime.Now - startTid;
-            kjorer = false;
+            stoppeklokke.Stop();
         }
 
         public void Fortsett()
         {
-            if (kjorer)
+            if (stoppeklokke.IsRunning)
                 return;
 
-            startTid = DateTime.Now;
-            kjorer = true;
+            stoppeklokke.Start();
         }
 
         public void Stopp()
         {
-            if (kjorer)
-            {
-                oppsamletTid += DateTime.Now - startTid;
-            }
-
-            kjorer = false;
+            stoppeklokke.Stop();
         }
 
         public void Nullstill()
         {
-            oppsamletTid = TimeSpan.Zero;
-            kjorer = false;
+            stoppeklokke.Reset();
         }
     }
 }
+///////////////// simen /////////////////

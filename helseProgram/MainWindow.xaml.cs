@@ -1,18 +1,19 @@
 ﻿using helseProgram.Simulering;
+using System;
 using System.Windows;
 using System.Windows.Threading;
 
 
+///////////////// simen /////////////////
+
 namespace helseProgram
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private readonly SimulasjonsStateMachine stateMachine;
         private readonly SimulasjonsKlokke klokke;
         private readonly DispatcherTimer uiTimer;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -20,74 +21,85 @@ namespace helseProgram
             stateMachine = new SimulasjonsStateMachine();
             klokke = new SimulasjonsKlokke();
 
-            // Subscribe to state changes to update UI (enable/disable buttons)
-            stateMachine.TilstandEndret += OnTilstandEndret;
-
-            // Initialize controls according to initial state
-            UpdateControls(stateMachine.Tilstand);
-
-            uiTimer = new DispatcherTimer();
-
-            uiTimer.Interval = TimeSpan.FromMilliseconds(100);
-
+            uiTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(100)
+            };
             uiTimer.Tick += UiTimer_Tick;
-        }
 
-        private void UiTimer_Tick(object? sender, EventArgs e)
-        {
-            SimulasjonsTidText.Text =
-                klokke.SimulasjonsTid.ToString(@"hh\:mm\:ss");
-        }
-        private void PauseKnapp_Click(object sender, RoutedEventArgs e)
-        {
-            if (stateMachine.Tilstand == SimulasjonsTilstand.Kjorer)
-            {
-                stateMachine.Pause();
-
-                klokke.Pause();
-
-                uiTimer.Stop();
-
-                PauseKnapp.Content = "Fortsett";
-
-                // Pause-knappen må fortsatt være aktiv
-                PauseKnapp.IsEnabled = true;
-                StoppKnapp.IsEnabled = true;
-            }
-            else if (stateMachine.Tilstand == SimulasjonsTilstand.Pauset)
-            {
-                stateMachine.Fortsett();
-
-                klokke.Fortsett();
-
-                uiTimer.Start();
-
-                PauseKnapp.Content = "Pause";
-            }
-        }
-
-        private void StoppKnapp_Click(object sender, RoutedEventArgs e)
-        {
-            stateMachine.Stopp();
-
-            klokke.Stopp();
-
-            uiTimer.Stop();
-
-            SimulasjonsTidText.Text =
-                klokke.SimulasjonsTid.ToString(@"hh\:mm\:ss");
+            stateMachine.TilstandEndret += OnTilstandEndret;
+            UpdateControls(stateMachine.Tilstand);
+            OppdaterTidsvisning();
         }
 
         private void StartKnapp_Click(object sender, RoutedEventArgs e)
         {
             stateMachine.Start();
             klokke.Start();
+            Tidslinje.Nullstill();
             uiTimer.Start();
+            OppdaterTidsvisning();
         }
 
-        private void OnTilstandEndret(Simulering.SimulasjonsTilstand tilstand)
+        private void PauseKnapp_Click(object sender, RoutedEventArgs e)
         {
-            // Ensure UI update happens on UI thread
+            if (stateMachine.Tilstand == SimulasjonsTilstand.Kjorer)
+            {
+                stateMachine.Pause();
+                klokke.Pause();
+                uiTimer.Stop();
+            }
+            else if (stateMachine.Tilstand == SimulasjonsTilstand.Pauset)
+            {
+                stateMachine.Fortsett();
+                klokke.Fortsett();
+                uiTimer.Start();
+            }
+
+            OppdaterTidsvisning();
+        }
+
+        private void StoppKnapp_Click(object sender, RoutedEventArgs e)
+        {
+            stateMachine.Stopp();
+            klokke.Stopp();
+            uiTimer.Stop();
+            OppdaterTidsvisning();
+        }
+
+        private void OpprettDoseKnapp_Click(object sender, RoutedEventArgs e)
+        {
+            ApneDoseRegistrering();
+        }
+
+        private void ApneDoseRegistrering()
+        {
+            var window = new DoseRegistrationWindow
+            {
+                Owner = this
+            };
+
+            window.ShowDialog();
+
+            // Når DoseRegistrationWindow returnerer den registrerte dosen,
+            // kan den plasseres på tidslinjen slik:
+            // Tidslinje.LeggTilDose("Medikamentnavn", klokke.SimulasjonsTid);
+        }
+
+        private void UiTimer_Tick(object? sender, EventArgs e)
+        {
+            OppdaterTidsvisning();
+        }
+
+        private void OppdaterTidsvisning()
+        {
+            TimeSpan simulasjonsTid = klokke.SimulasjonsTid;
+            SimulasjonsTidText.Text = simulasjonsTid.ToString(@"hh\:mm\:ss");
+            Tidslinje.Oppdater(simulasjonsTid);
+        }
+
+        private void OnTilstandEndret(SimulasjonsTilstand tilstand)
+        {
             if (!Dispatcher.CheckAccess())
             {
                 Dispatcher.Invoke(() => OnTilstandEndret(tilstand));
@@ -97,26 +109,46 @@ namespace helseProgram
             UpdateControls(tilstand);
         }
 
-        private void UpdateControls(Simulering.SimulasjonsTilstand tilstand)
+        private void UpdateControls(SimulasjonsTilstand tilstand)
         {
-            //StartKnapp, PauseKnapp and StoppKnapp in XAML
-            StartKnapp.IsEnabled = tilstand == Simulering.SimulasjonsTilstand.IkkeStartet;
-            PauseKnapp.IsEnabled = tilstand == Simulering.SimulasjonsTilstand.Kjorer;
-            StoppKnapp.IsEnabled = tilstand == Simulering.SimulasjonsTilstand.Kjorer ||
-                                   tilstand == Simulering.SimulasjonsTilstand.Pauset;
-        }
+            StartKnapp.IsEnabled = tilstand == SimulasjonsTilstand.IkkeStartet;
 
-        private void OpprettDoseKnapp_Click(object sender, RoutedEventArgs e)
-        {
-            var window = new DoseRegistrationWindow
+            // Den samme knappen brukes til både Pause og Fortsett.
+            PauseKnapp.IsEnabled = tilstand == SimulasjonsTilstand.Kjorer ||
+                                   tilstand == SimulasjonsTilstand.Pauset;
+
+            StoppKnapp.IsEnabled = tilstand == SimulasjonsTilstand.Kjorer ||
+                                   tilstand == SimulasjonsTilstand.Pauset;
+
+            // Hele simuleringen er fryst under pause.
+            OpprettDoseKnapp.IsEnabled = tilstand == SimulasjonsTilstand.Kjorer;
+
+            PauseKnapp.Content = tilstand == SimulasjonsTilstand.Pauset
+                ? "▶  Fortsett"
+                : "Ⅱ  Pause";
+
+            TilstandText.Text = tilstand switch
             {
-                Owner = this
+                SimulasjonsTilstand.IkkeStartet => "Ikke startet",
+                SimulasjonsTilstand.Kjorer => "Pågår",
+                SimulasjonsTilstand.Pauset => "Pauset",
+                SimulasjonsTilstand.Avsluttet => "Avsluttet",
+                _ => "Ukjent"
             };
-
-            window.ShowDialog();
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            uiTimer.Stop();
+            stateMachine.TilstandEndret -= OnTilstandEndret;
+            base.OnClosed(e);
+        }
 
+        private void Tidslinje_Loaded(object sender, RoutedEventArgs e)
+        {
 
+        }
     }
 }
+
+///////////////// simen /////////////////

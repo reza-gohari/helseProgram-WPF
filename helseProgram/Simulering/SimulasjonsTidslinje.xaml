@@ -1,0 +1,82 @@
+<!-- ///////////////// simen ///////////////// -->
+    
+    <UserControl x:Class="helseProgram.Simulering.SimulasjonsTidslinje"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             MinHeight="300">
+    <Border Background="White"
+            BorderBrush="#9BAAB1"
+            BorderThickness="1"
+            CornerRadius="4">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="44" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="#0D5872" Padding="14,0">
+                <DockPanel>
+                    <TextBlock Text="SIMULASJONENS TIDSLINJE"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center" />
+                    <TextBlock x:Name="TidslinjeTidText"
+                               DockPanel.Dock="Right"
+                               Text="00:00:00"
+                               Foreground="White"
+                               FontFamily="Consolas"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center" />
+                </DockPanel>
+            </Border>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="155" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0"
+                        Background="#E9EFF2"
+                        BorderBrush="#B8C5CB"
+                        BorderThickness="0,0,1,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="65" />
+                            <RowDefinition Height="75" />
+                            <RowDefinition Height="75" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   Text="Tid"
+                                   FontWeight="Bold"
+                                   Margin="12,22,0,0" />
+                        <TextBlock Grid.Row="1"
+                                   Text="Hendelser"
+                                   FontWeight="SemiBold"
+                                   Margin="12,26,0,0" />
+                        <TextBlock Grid.Row="2"
+                                   Text="Medikamenter"
+                                   FontWeight="SemiBold"
+                                   Margin="12,26,0,0" />
+                    </Grid>
+                </Border>
+
+                <ScrollViewer x:Name="TidslinjeScrollViewer"
+                              Grid.Column="1"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Disabled">
+                    <Canvas x:Name="TidslinjeCanvas"
+                            Height="260"
+                            Width="1500"
+                            VerticalAlignment = "Top" 
+                            Background="White" />
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>
+<!-- ///////////////// simen ///////////////// -->
