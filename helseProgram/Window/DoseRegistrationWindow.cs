@@ -48,7 +48,7 @@ public partial class DoseRegistrationWindow : Window
             VarighetTime.Items.Add(time);
         }
 
-        for (var minutt = 0; minutt < 60; minutt += 5)
+        for (var minutt = 0; minutt < 60; minutt += 1)
         {
             VarighetMinutt.Items.Add(minutt.ToString("00"));
         }
