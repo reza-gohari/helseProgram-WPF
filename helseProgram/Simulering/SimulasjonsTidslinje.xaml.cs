@@ -20,6 +20,8 @@ namespace helseProgram.Simulering
 
         private readonly List<DoseMarkering> doseMarkeringer = new();
         private int tegnedeMinutter;
+        // REZA: Gir MainWindow beskjed når en ny hendelse registreres.
+        public event Action<string>? HendelseRegistrert;
 
         public SimulasjonsTidslinje()
         {
@@ -45,10 +47,19 @@ namespace helseProgram.Simulering
                 FlyttTidsmarkor(simulasjonsTid);
             }
         }
+        // REZA: Åpner registreringsvinduet og sender hendelsen videre.
+        private void NyHendelseKnapp_Click(object sender, RoutedEventArgs e)
+        {
+            var vindu = new EventRegistrationWindow();
+
+            if (vindu.ShowDialog() == true)
+                HendelseRegistrert?.Invoke(vindu.RegistrertHendelse);
+        }
 
         public void Nullstill()
         {
             doseMarkeringer.Clear();
+            hendelseMarkeringer.Clear(); // REZA: Fjerner registrerte hendelser.
             tegnedeMinutter = MinimumMinutter;
             TegnTidslinje(TimeSpan.Zero);
             TidslinjeScrollViewer.ScrollToHorizontalOffset(0);
@@ -108,11 +119,26 @@ namespace helseProgram.Simulering
                 }
             }
 
-            foreach (DoseMarkering dose in doseMarkeringer)
+            // Tegner registrerte medikamenter.
+foreach (DoseMarkering dose in doseMarkeringer)
                 TegnDose(dose);
 
+            // REZA: Tegner registrerte hendelser.
+            foreach (HendelseMarkering hendelse in hendelseMarkeringer)
+                TegnHendelse(hendelse);
+
+            // Oppdaterer den gule tidsmarkøren.
             FlyttTidsmarkor(simulasjonsTid);
         }
+        // REZA: Informasjon om én hendelse på tidslinjen.
+        private class HendelseMarkering
+        {
+            public TimeSpan Tidspunkt { get; set; }
+            public string Beskrivelse { get; set; } = "";
+        }
+
+        // REZA: Beholder hendelsene når tidslinjen tegnes på nytt.
+        private readonly List<HendelseMarkering> hendelseMarkeringer = new();
 
         private void TegnRadBakgrunn(double topp, double hoyde, Color farge)
         {
@@ -195,6 +221,55 @@ namespace helseProgram.Simulering
             Canvas.SetTop(navn, 168);
             TidslinjeCanvas.Children.Add(navn);
         }
+        // ========== REZA START ==========
+        // Tegner registrerte hendelser som oransje punkter med tekst.
+        public void LeggTilHendelse(string beskrivelse, TimeSpan tidspunkt)
+        {
+            // Lagrer hendelsen med riktig simulasjonstid.
+            hendelseMarkeringer.Add(new HendelseMarkering
+            {
+                Tidspunkt = tidspunkt,
+                Beskrivelse = beskrivelse
+            });
+
+            // Tegner tidslinjen på nytt.
+            TegnTidslinje(tidspunkt);
+        }
+        //Tegner en hendelse på tidslinjen.
+        private void TegnHendelse(HendelseMarkering hendelse)
+        {
+            // Beregner plasseringen ut fra simulasjonstiden.
+            double x = VenstreMarg
+                     + hendelse.Tidspunkt.TotalMinutes * PikslerPerMinutt;
+
+            // Lager en oransje sirkel i hendelsesraden.
+            var punkt = new Ellipse
+            {
+                Width = 10,
+                Height = 10,
+                Fill = new SolidColorBrush(Color.FromRgb(230, 110, 40)),
+                Stroke = Brushes.White,
+                StrokeThickness = 1
+            };
+
+            Canvas.SetLeft(punkt, x - 5);
+            Canvas.SetTop(punkt, 100);
+            TidslinjeCanvas.Children.Add(punkt);
+
+            // Viser beskrivelsen ved siden av sirkelen.
+            var navn = new TextBlock
+            {
+                Text = hendelse.Beskrivelse,
+                FontSize = 11,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = new SolidColorBrush(Color.FromRgb(160, 70, 20))
+            };
+
+            Canvas.SetLeft(navn, x + 7);
+            Canvas.SetTop(navn, 96);
+            TidslinjeCanvas.Children.Add(navn);
+        }
+        // ========== REZA SLUTT ==========
 
         private void FjernElementerMedTag(string tag)
         {
@@ -218,6 +293,11 @@ namespace helseProgram.Simulering
 
             public string Navn { get; }
             public TimeSpan Tidspunkt { get; }
+        }
+        // REZA: Tester om stoppknappen fungerer.
+        private void StoppInfusjonKnapp_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Stoppknappen fungerer!");
         }
     }
 }

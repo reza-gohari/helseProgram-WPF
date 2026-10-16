@@ -1,0 +1,34 @@
+﻿  <Window x:Class="helseProgram.EventRegistrationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:helseProgram"
+        mc:Ignorable="d"
+        Title="Registrer hendelse" 
+        Height="250"
+        Width="400"
+        WindowStartupLocation="CenterOwner">
+    <Grid>
+        <!-- REZA: Felt for å skrive en ny hendelse -->
+        <StackPanel Margin="20">
+            <TextBlock Text="Beskriv hendelsen:"
+               FontWeight="Bold"
+               Margin="0,0,0,10"/>
+
+            <TextBox x:Name="HendelseTextBox"
+             Height="70"
+             TextWrapping="Wrap"
+             AcceptsReturn="True"/>
+            <!-- REZA: Knapp for å registrere hendelsen -->
+            <Button x:Name="RegistrerHendelseKnapp"
+                    Content="Registrer hendelse"
+                    Click="RegistrerHendelseKnapp_Click"
+                    Width="150"
+                    Height="35"
+                    Margin="0,15,0,0"
+                    HorizontalAlignment="Right"/>
+        </StackPanel>
+
+    </Grid>
+</Window>

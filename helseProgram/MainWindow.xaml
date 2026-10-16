@@ -6,12 +6,12 @@
         xmlns:simulering="clr-namespace:helseProgram.Simulering"
         mc:Ignorable="d"
         Title="Medikamentsimulering"
-        Height="620"
-        Width="1100"
-        MinHeight="500"
-        MinWidth="850">
-    
-    
+        Height="700"
+        Width="1400"
+        MinHeight="680"
+        MinWidth="1100">
+
+
     <!-- ///////////////// simen ///////////////// -->
     <!-- 
     Window Resources, for knapper, lager en egen sill som plaserers på kanppene i tool bar.
@@ -31,9 +31,19 @@
 
     <Grid Background="#F2F5F7">
         <Grid.RowDefinitions>
+            <!-- Simen: Verktøylinje -->
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" /> <!-- * gjør at raden tar resten av plassen som er tilgjengerlig på siden -->
+
+            <!-- REZA: Grafisk tidslinje -->
+            <RowDefinition Height="315" />
+
+            <!-- REZA: Liste over hendelser -->
+            <RowDefinition Height="130" />
+
+            <!-- REZA: Liste over medikamenter -->
+            <RowDefinition Height="150" />
         </Grid.RowDefinitions>
+
 
         <!-- Verktøylinje -->
         <Border Grid.Row="0"
@@ -109,6 +119,56 @@
         <simulering:SimulasjonsTidslinje x:Name="Tidslinje"
                                             Grid.Row="1"
                                             Margin="10" />
+        <!-- REZA: Viser registrerte hendelser -->
+        <GroupBox Grid.Row="2"
+          Header="Registrerte hendelser"
+          Margin="10,0,10,5">
+
+            <DataGrid x:Name="HendelserDataGrid"
+              AutoGenerateColumns="False"
+              IsReadOnly="True">
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Simulasjonstid"
+                                Binding="{Binding Tidspunkt}"
+                                Width="150" />
+
+                    <DataGridTextColumn Header="Hendelse"
+                                Binding="{Binding Beskrivelse}"
+                                Width="*" />
+                </DataGrid.Columns>
+
+            </DataGrid>
+        </GroupBox>
+        <!-- REZA: Viser registrerte medikamenter under hendelseslisten -->
+        <GroupBox Grid.Row="3"
+          Header="Registrerte medikamenter"
+          Margin="10,0,10,5">
+
+            <DataGrid x:Name="MedikamenterDataGrid"
+              AutoGenerateColumns="False"
+              IsReadOnly="True">
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Simulasjonstid"
+                                Binding="{Binding Simulasjonstid}"
+                                Width="120" />
+
+                    <DataGridTextColumn Header="Medikament"
+                                Binding="{Binding Medication}"
+                                Width="*" />
+
+                    <DataGridTextColumn Header="Dose"
+                                Binding="{Binding Dose}"
+                                Width="100" />
+
+                    <DataGridTextColumn Header="Doseform"
+                                Binding="{Binding DoseForm}"
+                                Width="120" />
+                </DataGrid.Columns>
+
+            </DataGrid>
+        </GroupBox>
     </Grid>
 </Window>
 

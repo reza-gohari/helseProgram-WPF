@@ -10,10 +10,14 @@ namespace helseProgram;
 
 public partial class DoseRegistrationWindow : Window
 {
+    
+
     private const string ChooseMedicationText = "Velg medikament...";
 
     // Listen over registrerte doser.
     private readonly ObservableCollection<RegisteredDose> registeredDoses = [];
+    // REZA: Lar MainWindow lese registrerte doser.
+    public IReadOnlyList<RegisteredDose> RegistrerteDoser => registeredDoses;
 
     private string locationTextBeforeTablet = string.Empty;
     private bool locationIsLocked;
@@ -150,6 +154,8 @@ public partial class DoseRegistrationWindow : Window
 
         registeredDoses.Add(new RegisteredDose(
             Medication: medication,
+            DoseForm: doseForm, // REZA: Lagrer valgt doseform.
+            Simulasjonstid: "", // REZA: Midlertidig tom verdi.
             Amount: "--",
             Dose: $"{doseText} {unit}",
             Concentration: "--",
@@ -388,7 +394,9 @@ public partial class DoseRegistrationWindow : Window
 
 // Informasjon om én registrert dose.
 public sealed record RegisteredDose(
+
     string Medication,
+    string DoseForm, // REZA: Angir om dosen er infusjon, bolus osv.
     string Amount,
     string Dose,
     string Concentration,
@@ -396,4 +404,6 @@ public sealed record RegisteredDose(
     string StartTime,
     DateTime StartDate,
     string Location,
+    string Simulasjonstid,
     string Comment);
+
