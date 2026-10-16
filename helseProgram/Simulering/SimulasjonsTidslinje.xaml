@@ -58,10 +58,30 @@
                                    Text="Hendelser"
                                    FontWeight="SemiBold"
                                    Margin="12,26,0,0" />
+                        <!-- Reza :Knapp for hendelse registerering -->
+                        <Button Grid.Row="1"
+                                Content=" + Ny hendelse"
+                                Click="NyHendelseKnapp_Click"
+                                Width="125"
+                                Height="25"
+                                VerticalAlignment="Bottom"
+                                Margin="0,0,0,5" />
+                        
                         <TextBlock Grid.Row="2"
                                    Text="Medikamenter"
                                    FontWeight="SemiBold"
                                    Margin="12,26,0,0" />
+                        <!-- Reza :Knapp for infujonregistering -->
+
+                        <Button x:Name="StoppInfusjonKnapp"
+                                Click="StoppInfusjonKnapp_Click"
+                                Grid.Row="2"
+                                Content=" + Infusjon stop"
+                                Width="125"
+                                Height="25"
+                                VerticalAlignment="Top"
+                                Margin="0,55,0,0" />
+
                     </Grid>
                 </Border>
 
