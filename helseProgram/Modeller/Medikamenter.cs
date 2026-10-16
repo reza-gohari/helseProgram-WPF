@@ -6,7 +6,6 @@ public class Medikamenter
 
     public string MedikamentNavn { get; set; } = string.Empty;
 
-    public decimal? Konsentrasjon { get; set; }
-
-    public string KonsentrasjonEnhet { get; set; } = string.Empty;
+    public ICollection<MedikamentType> MedikamentTyper { get; set; }
+        = new List<MedikamentType>();
 }

@@ -17,6 +17,33 @@ namespace helseProgram.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
 
+            modelBuilder.Entity("MedikamentVirkestoff", b =>
+                {
+                    b.Property<int>("MedikamentVirkestoffId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal?>("Konsentrasjon")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("KonsentrasjonEnhet")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MedikamentTypeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("VirkestoffNavn")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("MedikamentVirkestoffId");
+
+                    b.HasIndex("MedikamentTypeId");
+
+                    b.ToTable("MedikamentVirkestoff");
+                });
+
             modelBuilder.Entity("helseProgram.Modeller.MedikamentAdministrering", b =>
                 {
                     b.Property<int>("MedikamentAdministreringId")
@@ -68,18 +95,31 @@ namespace helseProgram.Migrations
                     b.ToTable("MedikamentAdministrering");
                 });
 
+            modelBuilder.Entity("helseProgram.Modeller.MedikamentType", b =>
+                {
+                    b.Property<int>("MedikamentTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Beskrivelse")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MedikamentId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("MedikamentTypeId");
+
+                    b.HasIndex("MedikamentId");
+
+                    b.ToTable("MedikamentType");
+                });
+
             modelBuilder.Entity("helseProgram.Modeller.Medikamenter", b =>
                 {
                     b.Property<int>("MedikamentId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<decimal?>("Konsentrasjon")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("KonsentrasjonEnhet")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("MedikamentNavn")
                         .IsRequired()
@@ -143,6 +183,17 @@ namespace helseProgram.Migrations
                     b.ToTable("SimSesjon");
                 });
 
+            modelBuilder.Entity("MedikamentVirkestoff", b =>
+                {
+                    b.HasOne("helseProgram.Modeller.MedikamentType", "MedikamentType")
+                        .WithMany("Virkestoffer")
+                        .HasForeignKey("MedikamentTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MedikamentType");
+                });
+
             modelBuilder.Entity("helseProgram.Modeller.MedikamentAdministrering", b =>
                 {
                     b.HasOne("helseProgram.Modeller.Medikamenter", "Medikament")
@@ -168,6 +219,27 @@ namespace helseProgram.Migrations
                     b.Navigation("Pasient");
 
                     b.Navigation("SimSesjon");
+                });
+
+            modelBuilder.Entity("helseProgram.Modeller.MedikamentType", b =>
+                {
+                    b.HasOne("helseProgram.Modeller.Medikamenter", "Medikamenter")
+                        .WithMany("MedikamentTyper")
+                        .HasForeignKey("MedikamentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Medikamenter");
+                });
+
+            modelBuilder.Entity("helseProgram.Modeller.MedikamentType", b =>
+                {
+                    b.Navigation("Virkestoffer");
+                });
+
+            modelBuilder.Entity("helseProgram.Modeller.Medikamenter", b =>
+                {
+                    b.Navigation("MedikamentTyper");
                 });
 #pragma warning restore 612, 618
         }
