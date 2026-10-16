@@ -1,49 +1,67 @@
-﻿using helseProgram.menu;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using helseProgram.menu;
 
 namespace helseProgram;
 
 public partial class DoseRegistrationWindow : Window
 {
-    
+    private const string velgLegemiddel = "Velg legemiddel...";
 
-    private const string ChooseMedicationText = "Velg medikament...";
+    private readonly ObservableCollection<RegisteredDose> registrerteDoser = new();
 
-    // Listen over registrerte doser.
-    private readonly ObservableCollection<RegisteredDose> registeredDoses = [];
-    // REZA: Lar MainWindow lese registrerte doser.
-    public IReadOnlyList<RegisteredDose> RegistrerteDoser => registeredDoses;
+    // ========== REZA START ==========
+    // Gjør registrerte doser tilgjengelige for MainWindow.
+    public IReadOnlyList<RegisteredDose> RegistrerteDoser => registrerteDoser;
+    // ========== REZA SLUTT ==========
 
-    private string locationTextBeforeTablet = string.Empty;
-    private bool locationIsLocked;
-    private bool isUpdatingDoseText;
+    private string stedForTablett = string.Empty;
+    private bool stedErLast;
 
     public DoseRegistrationWindow()
     {
         InitializeComponent();
-        PopulateMedicationList();
-        RegisteredDosesGrid.ItemsSource = registeredDoses;
+        FyllLegemiddelliste();
+        FyllVarighetslister();
+        OppdaterVarighet();
+
+        RegisteredDosesGrid.ItemsSource = registrerteDoser;
+        DoseTextBox.Clear();
     }
 
-    // Fyller nedtrekkslisten med medikamenter.
-    private void PopulateMedicationList()
+    private void FyllLegemiddelliste()
     {
-        MedicationComboBox.Items.Add(ChooseMedicationText);
+        MedicationComboBox.Items.Add(velgLegemiddel);
 
-        foreach (var medicationName in MedikamentListe.All)
+        foreach (var legemiddelnavn in MedikamentListe.All)
         {
-            MedicationComboBox.Items.Add(medicationName);
+            MedicationComboBox.Items.Add(legemiddelnavn);
         }
 
         MedicationComboBox.SelectedIndex = 0;
     }
 
-    // Låser lokalisasjon når doseformen er tablett.
+    private void FyllVarighetslister()
+    {
+        for (var time = 0; time <= 24; time++)
+        {
+            VarighetTime.Items.Add(time);
+        }
+
+        for (var minutt = 0; minutt < 60; minutt += 1)
+        {
+            VarighetMinutt.Items.Add(minutt.ToString("00"));
+        }
+
+        VarighetTime.SelectedIndex = 0;
+        VarighetMinutt.SelectedIndex = 0;
+    }
+
     private void DoseFormComboBox_SelectionChanged(
         object sender,
         SelectionChangedEventArgs e)
@@ -53,346 +71,248 @@ public partial class DoseRegistrationWindow : Window
             return;
         }
 
-        var isTablet = string.Equals(
-            GetSelectedComboBoxText(DoseFormComboBox),
+        var erTablett = string.Equals(
+            HentValgtTekst(DoseFormComboBox),
             "Tablett",
             StringComparison.OrdinalIgnoreCase);
 
-        if (isTablet)
+        // Sted er ikke relevant når doseformen er tablett
+        if (erTablett)
         {
-            if (!locationIsLocked)
+            if (!stedErLast)
             {
-                locationTextBeforeTablet = LocationTextBox.Text;
+                stedForTablett = LocationTextBox.Text;
             }
 
-            locationIsLocked = true;
+            stedErLast = true;
             LocationTextBox.Text = "--";
             LocationTextBox.IsReadOnly = true;
             LocationTextBox.IsHitTestVisible = false;
             LocationTextBox.Focusable = false;
             LocationTextBox.Foreground = Brushes.Gray;
             LocationTextBox.Background = Brushes.LightGray;
-            return;
         }
-
-        if (!locationIsLocked)
+        else if (stedErLast)
         {
-            return;
+            stedErLast = false;
+            LocationTextBox.Text = stedForTablett;
+            LocationTextBox.IsReadOnly = false;
+            LocationTextBox.IsHitTestVisible = true;
+            LocationTextBox.Focusable = true;
+            LocationTextBox.Foreground = Brushes.Black;
+            LocationTextBox.Background = Brushes.White;
         }
 
-        locationIsLocked = false;
-        LocationTextBox.Text = locationTextBeforeTablet;
-        LocationTextBox.IsReadOnly = false;
-        LocationTextBox.IsHitTestVisible = true;
-        LocationTextBox.Focusable = true;
-        LocationTextBox.Foreground = Brushes.Black;
-        LocationTextBox.Background = Brushes.White;
+        OppdaterVarighet();
     }
 
-    // Kontrollerer feltene og registrerer dosen.
+    private void KontinuerligCheckBox_Endret(
+        object sender,
+        RoutedEventArgs e)
+    {
+        OppdaterVarighet();
+    }
+
+    private void OppdaterVarighet()
+    {
+        if (VarighetTime is null ||
+            VarighetMinutt is null ||
+            KontinuerligCheckBox is null)
+        {
+            return;
+        }
+
+        var erInfusjon = string.Equals(
+            HentValgtTekst(DoseFormComboBox),
+            "Infusjon",
+            StringComparison.OrdinalIgnoreCase);
+
+        KontinuerligCheckBox.IsEnabled = erInfusjon;
+
+        if (!erInfusjon)
+        {
+            KontinuerligCheckBox.IsChecked = false;
+        }
+
+        var erKontinuerlig =
+            KontinuerligCheckBox.IsChecked == true;
+
+        VarighetTime.IsEnabled = erInfusjon && !erKontinuerlig;
+        VarighetMinutt.IsEnabled = erInfusjon && !erKontinuerlig;
+    }
+
     private void CreateDoseButton_Click(object sender, RoutedEventArgs e)
     {
-        var medication = GetSelectedComboBoxText(MedicationComboBox);
-        var doseForm = GetSelectedComboBoxText(DoseFormComboBox);
-        var doseText = DoseTextBox.Text.Trim();
-        var startTimeText = StartTimeTextBox.Text.Trim();
+        var legemiddel = HentValgtTekst(MedicationComboBox);
+        var doseform = HentValgtTekst(DoseFormComboBox);
+        var dosetekst = DoseTextBox.Text.Trim();
+        var klokkeslettTekst = StartTimeTextBox.Text.Trim();
 
-        if (string.IsNullOrWhiteSpace(medication) ||
-            medication == ChooseMedicationText)
+        if (string.IsNullOrWhiteSpace(legemiddel) ||
+            legemiddel == velgLegemiddel)
         {
-            ShowInvalidField(
-                "Ugyldig forordningsmiddel.",
-                MedicationComboBox);
-
+            VisFeil("Velg et legemiddel.", MedicationComboBox);
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(doseForm) ||
-            doseForm == "Velg...")
+        if (string.IsNullOrWhiteSpace(doseform) || doseform == "Velg...")
         {
-            ShowInvalidField(
-                "Ugyldig doseform.",
-                DoseFormComboBox);
-
+            VisFeil("Velg en doseform.", DoseFormComboBox);
             return;
         }
 
-        if (!TryParsePositiveDose(doseText, out _))
+        if (!ErGyldigDose(dosetekst, out _))
         {
-            ShowInvalidField("Ugyldig dose.", DoseTextBox);
+            VisFeil(
+                "Skriv en gyldig dose større enn 0, for eksempel 1,5.",
+                DoseTextBox);
             return;
         }
 
         if (!DateTime.TryParseExact(
-                startTimeText,
+                klokkeslettTekst,
                 "HH:mm",
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.None,
-                out var startTime))
+                out var klokkeslett))
         {
-            ShowInvalidField(
-                "Ugyldig starttid.",
+            VisFeil(
+                "Skriv starttid som tt:mm, for eksempel 14:30.",
                 StartTimeTextBox);
-
             return;
         }
 
-        if (StartDatePicker.SelectedDate is not DateTime startDate)
+        if (StartDatePicker.SelectedDate is not DateTime dato)
         {
-            ShowInvalidField(
-                "Ugyldig startdato.",
-                StartDatePicker);
-
+            VisFeil("Velg en startdato.", StartDatePicker);
             return;
         }
 
-        var unit = GetSelectedComboBoxText(DoseUnitComboBox);
-        var administration =
-            GetSelectedComboBoxText(AdministrationRouteComboBox);
+        var enhet = HentValgtTekst(DoseUnitComboBox);
+        var administreringsmate = HentValgtTekst(AdministrationRouteComboBox);
+        var timer = HentValgtTekst(VarighetTime);
+        var minutter = HentValgtTekst(VarighetMinutt);
+        var varighet = doseform == "Infusjon"
+            ? KontinuerligCheckBox.IsChecked == true
+                ? "Kontinuerlig"
+                : $"{timer} t {minutter} min"
+            : "--";
+        var kommentar = CommentTextBox.Text.Trim();
 
-        var comment = CommentTextBox.Text.Trim();
-
-        registeredDoses.Add(new RegisteredDose(
-            Medication: medication,
-            DoseForm: doseForm, // REZA: Lagrer valgt doseform.
-            Simulasjonstid: "", // REZA: Midlertidig tom verdi.
-            Amount: "--",
-            Dose: $"{doseText} {unit}",
+        // ========== REZA START ==========
+        // Registrerer medikamentet og beholder feltet for simulasjonstid.
+        registrerteDoser.Add(new RegisteredDose(
+            Medication: legemiddel,
+            DoseForm: doseform,
+            Simulasjonstid: "",
+                    // ========== REZA SLUTT ==========
+                    Amount: "--",
+            Dose: $"{dosetekst} {enhet}",
             Concentration: "--",
-            Administration:
-                administration == "Velg..."
-                    ? "--"
-                    : administration,
-            StartTime:
-                startTime.ToString(
-                    "HH:mm",
-                    CultureInfo.InvariantCulture),
-            StartDate: startDate.Date,
-            Location:
-                locationIsLocked ||
+            Administration: administreringsmate == "Velg..."
+                ? "--"
+                : administreringsmate,
+            Duration: varighet,
+            StartTime: klokkeslett.ToString(
+                "HH:mm",
+                CultureInfo.InvariantCulture),
+            StartDate: dato.Date,
+            Location: stedErLast ||
                 string.IsNullOrWhiteSpace(LocationTextBox.Text)
                     ? "--"
                     : LocationTextBox.Text.Trim(),
-            Comment:
-                string.IsNullOrWhiteSpace(comment)
-                    ? "--"
-                    : comment));
+            Comment: string.IsNullOrWhiteSpace(kommentar)
+                ? "--"
+                : kommentar));
 
-        // Nullstiller feltene etter registrering.
-        RegisteredDosesGrid.ScrollIntoView(registeredDoses[^1]);
-        ResetDoseInput();
+        RegisteredDosesGrid.ScrollIntoView(
+            registrerteDoser[registrerteDoser.Count - 1]);
+
+        NullstillDose();
+        KontinuerligCheckBox.IsChecked = false;
+        VarighetTime.SelectedIndex = 0;
+        VarighetMinutt.SelectedIndex = 0;
         CommentTextBox.Clear();
         DoseTextBox.Focus();
     }
 
-    // Tillater bare tall i dosefeltet.
+    private void NullstillDose()
+    {
+        DoseTextBox.Clear();
+    }
+
+    private static bool ErGyldigDose(string tekst, out decimal verdi)
+    {
+        // Godta både komma og punktum som desimaltegn.
+        tekst = tekst.Replace('.', ',');
+        var norsk = CultureInfo.GetCultureInfo("nb-NO");
+
+        return decimal.TryParse(
+            tekst,
+            NumberStyles.AllowDecimalPoint,
+            norsk,
+            out verdi) && verdi > 0;
+    }
+
+    private void VisFeil(string melding, FrameworkElement felt)
+    {
+        MessageBox.Show(
+            this,
+            melding,
+            "Feil",
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
+
+        felt.Focus();
+    }
+
+    private static string HentValgtTekst(ComboBox liste)
+    {
+        if (liste.SelectedItem is ComboBoxItem valg)
+        {
+            return valg.Content?.ToString() ?? "";
+        }
+
+        return liste.SelectedItem?.ToString() ?? "";
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+
     private void DoseTextBox_PreviewTextInput(
         object sender,
         TextCompositionEventArgs e)
     {
-        e.Handled = true;
-
-        if (e.Text.Length != 1 || !char.IsDigit(e.Text[0]))
-        {
-            return;
-        }
-
-        ReplaceDoseDigit(e.Text[0]);
     }
 
-    // Styrer tastene som kan brukes i dosefeltet.
     private void DoseTextBox_PreviewKeyDown(
         object sender,
         KeyEventArgs e)
     {
-        if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
-        {
-            e.Handled = true;
-            return;
-        }
-
-        switch (e.Key)
-        {
-            case Key.Left:
-            case Key.Home:
-                SetDoseCaret(0);
-                e.Handled = true;
-                break;
-
-            case Key.Right:
-            case Key.End:
-                SetDoseCaret(2);
-                e.Handled = true;
-                break;
-
-            case Key.Back:
-            case Key.Delete:
-                ReplaceDoseDigit('0');
-                e.Handled = true;
-                break;
-
-            case Key.Space:
-            case Key.Decimal:
-            case Key.OemPeriod:
-            case Key.OemComma:
-                e.Handled = true;
-                break;
-        }
     }
 
     private void DoseTextBox_PreviewMouseDown(
         object sender,
         MouseButtonEventArgs e)
     {
-        e.Handled = true;
-        DoseTextBox.Focus();
-
-        var mousePosition = e.GetPosition(DoseTextBox);
-
-        SetDoseCaret(
-            mousePosition.X < DoseTextBox.ActualWidth / 2
-                ? 0
-                : 2);
     }
 
     private void DoseTextBox_GotKeyboardFocus(
         object sender,
         KeyboardFocusChangedEventArgs e)
     {
-        SetDoseCaret(0);
     }
 
     private void DoseTextBox_SelectionChanged(
         object sender,
         RoutedEventArgs e)
     {
-        if (isUpdatingDoseText || sender is not TextBox textBox)
-        {
-            return;
-        }
-
-        SetDoseCaret(NormalizeDoseCaret(textBox.CaretIndex));
-    }
-
-    // Erstatter tallet før eller etter punktum.
-    private void ReplaceDoseDigit(char digit)
-    {
-        var currentText = DoseTextBox.Text;
-
-        if (currentText.Length != 3 || currentText[1] != '.')
-        {
-            currentText = "0.0";
-        }
-
-        var digitIndex =
-            NormalizeDoseCaret(DoseTextBox.CaretIndex);
-
-        var characters = currentText.ToCharArray();
-        characters[digitIndex] = digit;
-
-        isUpdatingDoseText = true;
-        DoseTextBox.Text = new string(characters);
-        DoseTextBox.CaretIndex = digitIndex;
-        DoseTextBox.SelectionLength = 0;
-        isUpdatingDoseText = false;
-    }
-
-    private void ResetDoseInput()
-    {
-        isUpdatingDoseText = true;
-        DoseTextBox.Text = "0.0";
-        DoseTextBox.CaretIndex = 0;
-        DoseTextBox.SelectionLength = 0;
-        isUpdatingDoseText = false;
-    }
-
-    private void SetDoseCaret(int requestedIndex)
-    {
-        if (DoseTextBox is null)
-        {
-            return;
-        }
-
-        isUpdatingDoseText = true;
-        DoseTextBox.CaretIndex =
-            NormalizeDoseCaret(requestedIndex);
-
-        DoseTextBox.SelectionLength = 0;
-        isUpdatingDoseText = false;
-    }
-
-    // Markøren kan bare stå før eller etter punktum.
-    private static int NormalizeDoseCaret(int requestedIndex)
-    {
-        return requestedIndex <= 1 ? 0 : 2;
-    }
-
-    // Sjekker at dosen er et positivt tall.
-    private static bool TryParsePositiveDose(
-        string text,
-        out decimal value)
-    {
-        var norwegianCulture =
-            CultureInfo.GetCultureInfo("nb-NO");
-
-        if (decimal.TryParse(
-                text,
-                NumberStyles.Number,
-                norwegianCulture,
-                out value) &&
-            value > 0)
-        {
-            return true;
-        }
-
-        return decimal.TryParse(
-                   text,
-                   NumberStyles.Number,
-                   CultureInfo.InvariantCulture,
-                   out value) &&
-               value > 0;
-    }
-
-    private void ShowInvalidField(
-        string message,
-        FrameworkElement field)
-    {
-        MessageBox.Show(
-            this,
-            message,
-            "Feil",
-            MessageBoxButton.OK,
-            MessageBoxImage.Warning);
-
-        field.Focus();
-    }
-
-    // Henter teksten fra en ComboBox.
-    private static string GetSelectedComboBoxText(
-        ComboBox comboBox)
-    {
-        return comboBox.SelectedItem switch
-        {
-            ComboBoxItem item =>
-                item.Content?.ToString() ?? string.Empty,
-
-            object item =>
-                item.ToString() ?? string.Empty,
-
-            null =>
-                string.Empty
-        };
-    }
-
-    private void CloseButton_Click(
-        object sender,
-        RoutedEventArgs e)
-    {
-        Close();
     }
 }
 
-// Informasjon om én registrert dose.
 public sealed record RegisteredDose(
 
     string Medication,
@@ -401,9 +321,12 @@ public sealed record RegisteredDose(
     string Dose,
     string Concentration,
     string Administration,
+    string Duration,
     string StartTime,
     DateTime StartDate,
     string Location,
+    // ========== REZA START ==========
+    // Simulasjonstid brukes til visning i MainWindow.
     string Simulasjonstid,
+    // ========== REZA SLUTT ==========
     string Comment);
-
