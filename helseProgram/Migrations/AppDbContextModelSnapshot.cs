@@ -74,6 +74,13 @@ namespace helseProgram.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal?>("Konsentrasjon")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("KonsentrasjonEnhet")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("MedikamentNavn")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -98,6 +105,13 @@ namespace helseProgram.Migrations
 
                     b.Property<string>("Fornavn")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Journal")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("PasientHoyde")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("PasientVekt")

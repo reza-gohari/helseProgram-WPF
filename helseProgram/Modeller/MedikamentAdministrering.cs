@@ -10,9 +10,9 @@ public class MedikamentAdministrering
 
     public int SimSesjonsId { get; set; } // Hvilke simulering det potensielt tilhører
 
-    public string AdministreringsType { get; set; } = string.Empty; // bolus eller intravenøst
+    public string AdministreringsType { get; set; } = string.Empty; // bolus eller infusjon
 
-    public string AdministreringsMetode { get; set; } = string.Empty; // IV,IM osv, hvordan pasienten får dosen
+    public string AdministreringsMetode { get; set; } = string.Empty; // IV,IM, SC osv, hvordan pasienten får dosen
 
     public decimal Dose { get; set; } //mengde 
 
