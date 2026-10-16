@@ -120,7 +120,7 @@ namespace helseProgram.Simulering
             }
 
             // Tegner registrerte medikamenter.
-foreach (DoseMarkering dose in doseMarkeringer)
+            foreach (DoseMarkering dose in doseMarkeringer)
                 TegnDose(dose);
 
             // REZA: Tegner registrerte hendelser.

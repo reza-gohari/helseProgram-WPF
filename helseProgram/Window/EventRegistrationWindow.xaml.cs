@@ -14,20 +14,18 @@ using System.Windows.Shapes;
 
 namespace helseProgram
 {
-    /// <summary>
-    /// Interaction logic for EventRegistrationWindow.xaml
-    /// </summary>
+   
     public partial class EventRegistrationWindow : System.Windows.Window
     {
         public EventRegistrationWindow()
         {
             InitializeComponent();
         }
-        // REZA: Lagrer teksten som brukeren registrerer.
+        // Lagrer teksten som brukeren registrerer.
         public string RegistrertHendelse { get; private set; } = "";
 
 
-        // REZA: Kontrollerer at brukeren har skrevet en hendelse.
+        // Kontrollerer at brukeren har skrevet en hendelse.
         private void RegistrerHendelseKnapp_Click(object sender, RoutedEventArgs e)
         {
             string hendelse = HendelseTextBox.Text.Trim();
