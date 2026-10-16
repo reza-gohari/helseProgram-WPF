@@ -1,5 +1,7 @@
 ﻿using helseProgram.Simulering;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -13,10 +15,17 @@ namespace helseProgram
         private readonly SimulasjonsStateMachine stateMachine;
         private readonly SimulasjonsKlokke klokke;
         private readonly DispatcherTimer uiTimer;
+        // ========== REZA START ==========
+        // Beholder registrerte doser mellom åpninger av vinduet.
+        private readonly List<RegisteredDose> registrerteDoser = new();
+        // ========== REZA SLUTT ==========
+
 
         public MainWindow()
         {
             InitializeComponent();
+            // REZA: MainWindow lytter etter nye hendelser fra tidslinjen.
+            Tidslinje.HendelseRegistrert += Tidslinje_HendelseRegistrert;
 
             stateMachine = new SimulasjonsStateMachine();
             klokke = new SimulasjonsKlokke();
@@ -72,6 +81,9 @@ namespace helseProgram
             ApneDoseRegistrering();
         }
 
+        // ========== REZA START ==========
+        // Åpner doseregistrering og viser dosene med simulasjonstid.
+
         private void ApneDoseRegistrering()
         {
             var window = new DoseRegistrationWindow
@@ -81,10 +93,44 @@ namespace helseProgram
 
             window.ShowDialog();
 
-            // Når DoseRegistrationWindow returnerer den registrerte dosen,
-            // kan den plasseres på tidslinjen slik:
-            // Tidslinje.LeggTilDose("Medikamentnavn", klokke.SimulasjonsTid);
+            foreach (var dose in window.RegistrerteDoser)
+            {
+                TimeSpan tid = klokke.SimulasjonsTid;
+
+                registrerteDoser.Add(dose with
+                {
+                    Simulasjonstid = tid.ToString(@"hh\:mm\:ss")
+                });
+
+                Tidslinje.LeggTilDose(dose.Medication, tid);
+            }
+
+            MedikamenterDataGrid.ItemsSource = null;
+            MedikamenterDataGrid.ItemsSource = registrerteDoser;
         }
+        // ========== REZA START ==========
+        // Registrerer en hendelse med simulasjonstid i tabellen og tidslinjen.
+
+        private void Tidslinje_HendelseRegistrert(string hendelse)
+        {
+            TimeSpan tid = klokke.SimulasjonsTid;
+
+            Tidslinje.LeggTilHendelse(hendelse, tid);
+
+            var liste = HendelserDataGrid.ItemsSource as List<object>
+                        ?? new List<object>();
+
+            liste.Add(new
+            {
+                Tidspunkt = tid.ToString(@"hh\:mm\:ss"),
+                Beskrivelse = hendelse
+            });
+
+            HendelserDataGrid.ItemsSource = null;
+            HendelserDataGrid.ItemsSource = liste;
+        }
+
+        // ========== REZA SLUTT ==========
 
         private void UiTimer_Tick(object? sender, EventArgs e)
         {
