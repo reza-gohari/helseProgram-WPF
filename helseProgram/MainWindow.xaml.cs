@@ -15,12 +15,10 @@ namespace helseProgram
         private readonly SimulasjonsStateMachine stateMachine;
         private readonly SimulasjonsKlokke klokke;
         private readonly DispatcherTimer uiTimer;
-        // ========== REZA START ==========
-        // Beholder registrerte doser mellom åpninger av vinduet.
+
+        /////Reza, Doseliste for medikamenttabellen.
         private readonly List<RegisteredDose> registrerteDoser = new();
-        // ========== REZA SLUTT ==========
-
-
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -80,10 +78,7 @@ namespace helseProgram
         {
             ApneDoseRegistrering();
         }
-
-        // ========== REZA START ==========
-        // Åpner doseregistrering og viser dosene med simulasjonstid.
-
+        /////Reza, Åpner registrering og viser doser
         private void ApneDoseRegistrering()
         {
             var window = new DoseRegistrationWindow
@@ -101,15 +96,25 @@ namespace helseProgram
                 {
                     Simulasjonstid = tid.ToString(@"hh\:mm\:ss")
                 });
+                
+                // Kontinuerlig infusjon registreres separat fra vanlig dose.
+                if (dose.DoseForm == "Infusjon" &&
+                    dose.Duration == "Kontinuerlig")
+                {
+                    Tidslinje.LeggTilInfusjon(dose.Medication, tid);
+                }
+                else
+                {
+                    // Vanlige doser vises som punkter på tidslinjen.
+                    Tidslinje.LeggTilDose(dose.Medication, tid);
+                }
 
-                Tidslinje.LeggTilDose(dose.Medication, tid);
             }
 
             MedikamenterDataGrid.ItemsSource = null;
             MedikamenterDataGrid.ItemsSource = registrerteDoser;
         }
-        // ========== REZA START ==========
-        // Registrerer en hendelse med simulasjonstid i tabellen og tidslinjen.
+        /////Reza, Viser hendelsen i tabell og tidslinje
 
         private void Tidslinje_HendelseRegistrert(string hendelse)
         {
@@ -129,8 +134,6 @@ namespace helseProgram
             HendelserDataGrid.ItemsSource = null;
             HendelserDataGrid.ItemsSource = liste;
         }
-
-        // ========== REZA SLUTT ==========
 
         private void UiTimer_Tick(object? sender, EventArgs e)
         {

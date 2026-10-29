@@ -14,18 +14,17 @@ using System.Windows.Shapes;
 
 namespace helseProgram
 {
-   
+    /////Reza, Vindu for hendelsesregistrering.
     public partial class EventRegistrationWindow : System.Windows.Window
     {
         public EventRegistrationWindow()
         {
             InitializeComponent();
         }
-        // Lagrer teksten som brukeren registrerer.
+        /////Reza, Teksten som er registrert
         public string RegistrertHendelse { get; private set; } = "";
 
-
-        // Kontrollerer at brukeren har skrevet en hendelse.
+        /////Reza, Sjekker tekst og bekrefter registreringen.
         private void RegistrerHendelseKnapp_Click(object sender, RoutedEventArgs e)
         {
             string hendelse = HendelseTextBox.Text.Trim();
@@ -36,10 +35,10 @@ namespace helseProgram
                 return;
             }
 
-            // Gjør hendelsen tilgjengelig for tidslinjen.
+            
             RegistrertHendelse = hendelse;
 
-            // Lukker vinduet og bekrefter registreringen.
+            
             DialogResult = true;
         }
     }

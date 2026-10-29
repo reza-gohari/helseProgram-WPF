@@ -17,10 +17,12 @@ namespace helseProgram.Simulering
         private const double SkalaTopp = 42;
         private const double Bunn = 215;
         private const int MinimumMinutter = 60;
+        private TimeSpan gjeldendeSimulasjonsTid;
 
         private readonly List<DoseMarkering> doseMarkeringer = new();
-        private int tegnedeMinutter;
-        // REZA: Gir MainWindow beskjed når en ny hendelse registreres.
+        private int tegnedeMinutter = 120;
+
+        /// Redigert av REZA:Sender hendelser videre. 
         public event Action<string>? HendelseRegistrert;
 
         public SimulasjonsTidslinje()
@@ -28,26 +30,31 @@ namespace helseProgram.Simulering
             InitializeComponent();
             Loaded += (_, _) => Nullstill();
         }
-
         public void Oppdater(TimeSpan simulasjonsTid)
         {
-            TidslinjeTidText.Text = simulasjonsTid.ToString(@"hh\:mm\:ss");
+            ///Redigert av REZA,Husker siste simulasjonstid.
+            gjeldendeSimulasjonsTid = simulasjonsTid;
 
-            int nodvendigeMinutter = Math.Max(
-                MinimumMinutter,
-                (int)Math.Ceiling(simulasjonsTid.TotalMinutes / 5.0) * 5 + 5);
+            TidslinjeTidText.Text =
+                simulasjonsTid.ToString(@"hh\:mm\:ss");
 
-            if (nodvendigeMinutter != tegnedeMinutter)
+            bool aktivInfusjon = false;
+
+            foreach (var infusjon in infusjoner)
             {
-                tegnedeMinutter = nodvendigeMinutter;
+                if (infusjon.SluttTid == null)
+                {
+                    aktivInfusjon = true;
+                    break;
+                }
+            }
+
+            if (aktivInfusjon)
                 TegnTidslinje(simulasjonsTid);
-            }
             else
-            {
                 FlyttTidsmarkor(simulasjonsTid);
-            }
         }
-        // REZA: Åpner registreringsvinduet og sender hendelsen videre.
+        // REZA: Åpner hendelsenvinduet.
         private void NyHendelseKnapp_Click(object sender, RoutedEventArgs e)
         {
             var vindu = new EventRegistrationWindow();
@@ -59,8 +66,9 @@ namespace helseProgram.Simulering
         public void Nullstill()
         {
             doseMarkeringer.Clear();
-            hendelseMarkeringer.Clear(); // REZA: Fjerner registrerte hendelser.
-            tegnedeMinutter = MinimumMinutter;
+            hendelseMarkeringer.Clear();
+
+            tegnedeMinutter = 120;
             TegnTidslinje(TimeSpan.Zero);
             TidslinjeScrollViewer.ScrollToHorizontalOffset(0);
         }
@@ -69,16 +77,30 @@ namespace helseProgram.Simulering
         {
             doseMarkeringer.Add(new DoseMarkering(medikamentnavn, tidspunkt));
 
-            int nodvendigeMinutter = Math.Max(
-                MinimumMinutter,
-                (int)Math.Ceiling(tidspunkt.TotalMinutes / 5.0) * 5 + 5);
-
-            if (nodvendigeMinutter > tegnedeMinutter)
-                tegnedeMinutter = nodvendigeMinutter;
+            tegnedeMinutter = 120;
 
             TegnTidslinje(tidspunkt);
         }
 
+        //////Reza ,Legger til infusjon 
+        public void LeggTilInfusjon(string navn, TimeSpan startTid)
+        {
+            InfusjonMarkering infusjon = new InfusjonMarkering();
+
+            infusjon.Navn = navn;
+            infusjon.StartTid = startTid;
+            infusjon.SluttTid = null;
+
+            infusjoner.Add(infusjon);
+
+            InfusjonComboBox.Items.Add(navn);
+
+            VisAktiveInfusjoner();
+
+            TegnTidslinje(startTid);
+        }
+
+       
         private void TegnTidslinje(TimeSpan simulasjonsTid)
         {
             TidslinjeCanvas.Children.Clear();
@@ -97,7 +119,7 @@ namespace helseProgram.Simulering
                     X1 = x,
                     X2 = x,
                     Y1 = hovedstrek ? 30 : SkalaTopp,
-                    Y2 = Bunn,
+                    Y2 = TidslinjeCanvas.Height,
                     Stroke = hovedstrek
                         ? new SolidColorBrush(Color.FromRgb(142, 158, 166))
                         : new SolidColorBrush(Color.FromRgb(218, 225, 229)),
@@ -123,22 +145,28 @@ namespace helseProgram.Simulering
             foreach (DoseMarkering dose in doseMarkeringer)
                 TegnDose(dose);
 
-            // REZA: Tegner registrerte hendelser.
+            ////Reza ,Tegner registrerte infusjoner.
+            foreach (InfusjonMarkering infusjon in infusjoner)
+            {
+                TegnInfusjon(infusjon, simulasjonsTid);
+            }
+
+            ////Reza, Tegner registrerte hendelser.
             foreach (HendelseMarkering hendelse in hendelseMarkeringer)
                 TegnHendelse(hendelse);
 
             // Oppdaterer den gule tidsmarkøren.
             FlyttTidsmarkor(simulasjonsTid);
         }
-        // REZA: Informasjon om én hendelse på tidslinjen.
+        ///// Reza ,Data om hendelsen.
         private class HendelseMarkering
         {
             public TimeSpan Tidspunkt { get; set; }
             public string Beskrivelse { get; set; } = "";
         }
-
-        // REZA: Beholder hendelsene når tidslinjen tegnes på nytt.
+        /// /Reza Beholder hendelsene når tidslinjen tegnes på nytt.
         private readonly List<HendelseMarkering> hendelseMarkeringer = new();
+
 
         private void TegnRadBakgrunn(double topp, double hoyde, Color farge)
         {
@@ -193,7 +221,7 @@ namespace helseProgram.Simulering
                     Math.Max(0, x - TidslinjeScrollViewer.ViewportWidth + 80));
             }
         }
-
+        /////Reza ,Tegner dose med punkt og navn.
         private void TegnDose(DoseMarkering dose)
         {
             double x = VenstreMarg + dose.Tidspunkt.TotalMinutes * PikslerPerMinutt;
@@ -207,7 +235,7 @@ namespace helseProgram.Simulering
                 StrokeThickness = 1
             };
             Canvas.SetLeft(punkt, x - 5);
-            Canvas.SetTop(punkt, 172);
+            Canvas.SetTop(punkt, 143);
             TidslinjeCanvas.Children.Add(punkt);
 
             var navn = new TextBlock
@@ -218,31 +246,82 @@ namespace helseProgram.Simulering
                 Foreground = new SolidColorBrush(Color.FromRgb(25, 74, 54))
             };
             Canvas.SetLeft(navn, x + 7);
-            Canvas.SetTop(navn, 168);
+            Canvas.SetTop(navn,140);
             TidslinjeCanvas.Children.Add(navn);
         }
-        // ========== REZA START ==========
-        // Tegner registrerte hendelser som oransje punkter med tekst.
+        ///// Reza ,Tegner infusjon med linje og navn.
+        private void TegnInfusjon(
+            InfusjonMarkering infusjon,
+            TimeSpan simulasjonsTid)
+        {
+            double startX = VenstreMarg +
+                infusjon.StartTid.TotalMinutes * PikslerPerMinutt;
+
+            TimeSpan sluttTid;
+
+            if (infusjon.SluttTid != null)
+            {
+                sluttTid = infusjon.SluttTid.Value;
+            }
+            else
+            {
+                sluttTid = simulasjonsTid;
+            }
+
+            double sluttX = VenstreMarg +
+                sluttTid.TotalMinutes * PikslerPerMinutt;
+
+            if (sluttX < startX)
+            {
+                sluttX = startX;
+            }
+
+            int nummer = infusjoner.IndexOf(infusjon);
+            
+            double hoyde = 180 + nummer * 25;
+
+            Line linje = new Line
+            {
+                X1 = startX,
+                Y1 = hoyde,
+                X2 = sluttX,
+                Y2 = hoyde,
+                Stroke = Brushes.Green,
+                StrokeThickness = 4
+            };
+
+            TidslinjeCanvas.Children.Add(linje);
+
+            TextBlock navn = new TextBlock
+            {
+                Text = infusjon.Navn,
+                FontSize = 11,
+                Foreground = Brushes.DarkGreen
+            };
+
+            Canvas.SetLeft(navn, startX + 5);
+            Canvas.SetTop(navn, hoyde + 5 );
+
+            TidslinjeCanvas.Children.Add(navn);
+        }
+        ///// Reza//// Legger til hendelse.
         public void LeggTilHendelse(string beskrivelse, TimeSpan tidspunkt)
         {
-            // Lagrer hendelsen med riktig simulasjonstid.
+            
             hendelseMarkeringer.Add(new HendelseMarkering
             {
                 Tidspunkt = tidspunkt,
                 Beskrivelse = beskrivelse
             });
 
-            // Tegner tidslinjen på nytt.
             TegnTidslinje(tidspunkt);
         }
-        //Tegner en hendelse på tidslinjen.
+        ///// Reza ,Tegner hendelse med punkt og tekst.
         private void TegnHendelse(HendelseMarkering hendelse)
         {
-            // Beregner plasseringen ut fra simulasjonstiden.
             double x = VenstreMarg
                      + hendelse.Tidspunkt.TotalMinutes * PikslerPerMinutt;
 
-            // Lager en oransje sirkel i hendelsesraden.
             var punkt = new Ellipse
             {
                 Width = 10,
@@ -255,8 +334,14 @@ namespace helseProgram.Simulering
             Canvas.SetLeft(punkt, x - 5);
             Canvas.SetTop(punkt, 100);
             TidslinjeCanvas.Children.Add(punkt);
+            
+            int nummer = hendelseMarkeringer.IndexOf(hendelse);
+            double y = 85;
+            if (nummer % 2 == 1)
+            {
+                y = 120;
+            }
 
-            // Viser beskrivelsen ved siden av sirkelen.
             var navn = new TextBlock
             {
                 Text = hendelse.Beskrivelse,
@@ -265,11 +350,11 @@ namespace helseProgram.Simulering
                 Foreground = new SolidColorBrush(Color.FromRgb(160, 70, 20))
             };
 
-            Canvas.SetLeft(navn, x + 7);
-            Canvas.SetTop(navn, 96);
+            Canvas.SetLeft(navn, x + 15);
+            Canvas.SetTop(navn, y-4);
             TidslinjeCanvas.Children.Add(navn);
         }
-        // ========== REZA SLUTT ==========
+        
 
         private void FjernElementerMedTag(string tag)
         {
@@ -282,7 +367,10 @@ namespace helseProgram.Simulering
                 }
             }
         }
+        /// Reza ,Infusjonsliste.
+        private readonly List<InfusjonMarkering> infusjoner = new();
 
+        ///// Reza//// Data om dosen
         private sealed class DoseMarkering
         {
             public DoseMarkering(string navn, TimeSpan tidspunkt)
@@ -294,11 +382,60 @@ namespace helseProgram.Simulering
             public string Navn { get; }
             public TimeSpan Tidspunkt { get; }
         }
-        // REZA: Tester om stoppknappen fungerer.
+        ///// Reza ,Stopper valgt infusjon.
         private void StoppInfusjonKnapp_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Stoppknappen fungerer!");
+            string? valgtNavn = InfusjonComboBox.SelectedItem as string;
+
+            foreach (var infusjon in infusjoner)
+            {
+                if (infusjon.Navn == valgtNavn &&
+                    infusjon.SluttTid == null)
+                {
+                    infusjon.SluttTid = gjeldendeSimulasjonsTid;
+
+                    TegnTidslinje(gjeldendeSimulasjonsTid);
+
+                    InfusjonComboBox.Items.Remove(valgtNavn);
+                    return;
+                }
+            }
+
+            MessageBox.Show("Velg en aktiv infusjon.");
         }
+        ///// Reza ,Lagrer navn, starttid og sluttid for infusjon.
+        private class InfusjonMarkering
+        {
+            public string Navn { get; set; } = "";
+
+            
+            public TimeSpan StartTid { get; set; }
+
+            
+            public TimeSpan? SluttTid { get; set; }
+        }
+        ///// Reza ,Viser stoppknapper for aktive infusjoner.
+        private void VisAktiveInfusjoner()
+        {
+            // Fjerner gamle knapper.
+            AktiveInfusjonerPanel.Children.Clear();
+
+            foreach (var infusjon in infusjoner)
+            {
+                if (infusjon.SluttTid == null)
+                {
+                    Button knapp = new Button();
+
+                    knapp.Content = "Stopp " + infusjon.Navn;
+                    knapp.Height = 25;
+                    knapp.Margin = new Thickness(0, 2, 0, 2);
+
+                    AktiveInfusjonerPanel.Children.Add(knapp);
+                }
+            }
+        }
+
+
     }
 }
 
