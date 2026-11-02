@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using helseProgram.menu;
 
+/////////////////Ado////////////////////
 namespace helseProgram;
 
 public partial class DoseRegistrationWindow : Window
@@ -330,3 +331,5 @@ public sealed record RegisteredDose(
     string Simulasjonstid,
     // ========== REZA SLUTT ==========
     string Comment);
+
+/////////////////////Ado////////////////////////

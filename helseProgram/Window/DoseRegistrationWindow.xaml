@@ -1,3 +1,5 @@
+<!-- ///////////////// Ado ///////////////// -->
+
 <Window x:Class="helseProgram.DoseRegistrationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -223,3 +225,5 @@
         </StackPanel>
     </ScrollViewer>
 </Window>
+
+<!-- ///////////////// Ado ///////////////// -->
