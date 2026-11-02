@@ -1,3 +1,5 @@
+//Azo
+
 namespace helseProgram.Modeller;
 
 public class PasientInfo //Til senere bruk for når og hvis vi rekker å sette opp for pasient info.
@@ -11,4 +13,8 @@ public class PasientInfo //Til senere bruk for når og hvis vi rekker å sette o
     public DateTime Fodselsdag { get; set; }
 
     public int PasientVekt { get; set; }
+    
+    public decimal? PasientHoyde { get; set; }
+
+    public string Journal { get; set; } = string.Empty;
 }

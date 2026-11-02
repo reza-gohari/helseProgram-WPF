@@ -81,6 +81,17 @@ namespace helseProgram
             ApneDoseRegistrering();
         }
 
+        // Azo Start
+        private void PasientInfoKnapp_Click(object sender, RoutedEventArgs e)
+        {
+            var pasientVindu = new PasientInfoWindow
+            {
+                Owner = this
+            };
+            pasientVindu.ShowDialog();
+        }
+        //Azo Slutt
+
         // ========== REZA START ==========
         // Åpner doseregistrering og viser dosene med simulasjonstid.
 

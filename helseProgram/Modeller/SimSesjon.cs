@@ -1,3 +1,5 @@
+//Azo
+
 namespace helseProgram.Modeller;
 
 public class SimSesjon
