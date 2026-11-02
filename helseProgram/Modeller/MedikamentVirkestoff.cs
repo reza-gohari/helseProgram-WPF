@@ -1,3 +1,5 @@
+//Azo
+
 using helseProgram.Modeller;
 
 public class MedikamentVirkestoff

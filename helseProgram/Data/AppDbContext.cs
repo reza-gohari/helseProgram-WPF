@@ -1,3 +1,4 @@
+//azo
 using helseProgram.Modeller;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
