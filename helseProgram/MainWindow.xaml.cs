@@ -78,7 +78,21 @@ namespace helseProgram
         {
             ApneDoseRegistrering();
         }
+
+        // Azo Start
+        private void PasientInfoKnapp_Click(object sender, RoutedEventArgs e)
+        {
+            var pasientVindu = new PasientInfoWindow
+            {
+                Owner = this
+            };
+            pasientVindu.ShowDialog();
+        }
+        //Azo Slutt
+
         /////Reza, Åpner registrering og viser doser
+
+
         private void ApneDoseRegistrering()
         {
             var window = new DoseRegistrationWindow
@@ -199,5 +213,6 @@ namespace helseProgram
         }
     }
 }
+
 
 ///////////////// simen /////////////////

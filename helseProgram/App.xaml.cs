@@ -1,5 +1,4 @@
-﻿
-using System.Windows;
+﻿using System.Windows;
 using helseProgram.Data;
 
 namespace helseProgram;
@@ -12,7 +11,7 @@ public partial class App : Application
 
         using var db = new AppDbContext();
 
-        // Legg inn manglende medikamenter i databasen
+        // Legger inn manglende medikamenter i databasen
         MedikamentData.Seed(db);
     }
 }

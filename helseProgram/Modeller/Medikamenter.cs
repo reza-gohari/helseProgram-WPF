@@ -1,3 +1,4 @@
+//Azo
 namespace helseProgram.Modeller;
 
 public class Medikamenter

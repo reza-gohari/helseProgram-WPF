@@ -1,3 +1,5 @@
+<!-- ///////////////// Ado ///////////////// -->
+
 <Window x:Class="helseProgram.DoseRegistrationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,7 +10,8 @@
         MinHeight="600"
         WindowStartupLocation="CenterOwner">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto"
+    <Grid Background="#F2F5F7">
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled" Margin="0,0,0,31" HorizontalAlignment="Center" Width="760">
         <StackPanel Margin="10">
             <GroupBox Header="Medikament" Margin="0,0,0,10">
@@ -24,6 +27,10 @@
                     <StackPanel Grid.Column="0">
                         <TextBlock Margin="0,0,0,3" Text="Forordningsmiddel" />
                         <ComboBox x:Name="MedicationComboBox"
+                                  DisplayMemberPath="MedikamentNavn"
+                                  SelectedValuePath="MedikamentId"
+                                  IsTextSearchEnabled="True"
+                                  TextSearch.TextPath="MedikamentNavn"
                                   Height="27" />
                     </StackPanel>
 
@@ -222,4 +229,7 @@
             </DockPanel>
         </StackPanel>
     </ScrollViewer>
+        </Grid>
 </Window>
+
+<!-- ///////////////// Ado ///////////////// -->

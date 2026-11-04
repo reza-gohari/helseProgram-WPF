@@ -1,12 +1,18 @@
-﻿using System;
+﻿using helseProgram.Data;
+using helseProgram.menu;
+using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using helseProgram.menu;
+using helseProgram.Data;
+using helseProgram.Modeller;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
+/////////////////Ado////////////////////
 namespace helseProgram;
 
 public partial class DoseRegistrationWindow : Window
@@ -34,14 +40,16 @@ public partial class DoseRegistrationWindow : Window
 
     private void FyllLegemiddelliste()
     {
-        MedicationComboBox.Items.Add(velgLegemiddel);
+        using var db = new AppDbContext();
 
-        foreach (var legemiddelnavn in MedikamentListe.All)
-        {
-            MedicationComboBox.Items.Add(legemiddelnavn);
-        }
+        MedicationComboBox.ItemsSource = db.Medikamenter
+            .AsNoTracking()
+            .Include(m => m.MedikamentTyper)
+            .ThenInclude(mt => mt.Virkestoffer)
+            .OrderBy(m => m.MedikamentNavn)
+            .ToList();
 
-        MedicationComboBox.SelectedIndex = 0;
+        MedicationComboBox.SelectedIndex = -1;
     }
 
     private void FyllVarighetslister()
@@ -141,17 +149,20 @@ public partial class DoseRegistrationWindow : Window
 
     private void CreateDoseButton_Click(object sender, RoutedEventArgs e)
     {
-        var legemiddel = HentValgtTekst(MedicationComboBox);
-        var doseform = HentValgtTekst(DoseFormComboBox);
-        var dosetekst = DoseTextBox.Text.Trim();
-        var klokkeslettTekst = StartTimeTextBox.Text.Trim();
-
-        if (string.IsNullOrWhiteSpace(legemiddel) ||
-            legemiddel == velgLegemiddel)
+        if (MedicationComboBox.SelectedItem is not Medikamenter valgtMedikament)
         {
             VisFeil("Velg et legemiddel.", MedicationComboBox);
             return;
         }
+
+        var legemiddel = valgtMedikament.MedikamentNavn;
+        var medikamentId = valgtMedikament.MedikamentId;
+
+        var doseform = HentValgtTekst(DoseFormComboBox);
+        var dosetekst = DoseTextBox.Text.Trim();
+        var klokkeslettTekst = StartTimeTextBox.Text.Trim();
+
+        
 
         if (string.IsNullOrWhiteSpace(doseform) || doseform == "Velg...")
         {
@@ -326,3 +337,5 @@ public sealed record RegisteredDose(
     string Simulasjonstid,
     
     string Comment);
+
+/////////////////////Ado////////////////////////

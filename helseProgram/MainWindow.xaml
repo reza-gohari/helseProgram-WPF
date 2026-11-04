@@ -19,21 +19,29 @@
     HVORFOR: REDUNDANT KODE, for å unngå å skrive samme stil på alle knappene i tool baren.
     -->
     <Window.Resources>
-        <Style x:Key="VerktoylinjeKnapp" TargetType="Button">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Padding" Value="18,8" />
-            <Setter Property="Margin" Value="3,0" />
-            <Setter Property="BorderThickness" Value="4" />
-            <Setter Property="Cursor" Value="Hand" />
+        <Style x:Key="VerktoylinjeKnapp"
+               TargetType="Button">
+            <Setter Property="Foreground"
+                    Value="White"/>
+            <Setter Property="FontWeight"
+                    Value="SemiBold"/>
+            <Setter Property="Padding"
+                    Value="18,8"/>
+            <Setter Property="Margin"
+                    Value="3,0"/>
+            <Setter Property="BorderThickness"
+                    Value="4"/>
+            <Setter Property="Cursor"
+                    Value="Hand"/>
         </Style>
     </Window.Resources>
 
     <Grid Background="#F2F5F7">
         <Grid.RowDefinitions>
             <!-- Simen: Verktøylinje -->
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
 
+            
             <!-- /////Reza, Rad for tidslinjen. -->
             <RowDefinition Height="315" />
 
@@ -42,6 +50,16 @@
 
             <!-- /////Reza, Rad for medikamenttabellen. -->
             <RowDefinition Height="150" />
+
+            <!-- REZA: Grafisk tidslinje -->
+            <RowDefinition Height="315"/>
+
+            <!-- REZA: Liste over hendelser -->
+            <RowDefinition Height="130"/>
+
+            <!-- REZA: Liste over medikamenter -->
+            <RowDefinition Height="150"/>
+
         </Grid.RowDefinitions>
 
 
@@ -51,35 +69,45 @@
                 BorderBrush="#08394C"
                 BorderThickness="0,0,0,1"
                 Padding="8">
-            
-            
+
+
             <DockPanel LastChildFill="True">
-                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                <StackPanel DockPanel.Dock="Left"
+                            Orientation="Horizontal">
                     <Button x:Name="StartKnapp"
                             Content="▶  Start"
                             Background="#2E9D47"
                             Style="{StaticResource VerktoylinjeKnapp}"
-                            Click="StartKnapp_Click" />
+                            Click="StartKnapp_Click"/>
 
                     <Button x:Name="PauseKnapp"
                             Content="Ⅱ  Pause"
                             Background="#D28A16"
                             Style="{StaticResource VerktoylinjeKnapp}"
-                            Click="PauseKnapp_Click" />
+                            Click="PauseKnapp_Click"/>
 
                     <Button x:Name="StoppKnapp"
                             Content="■  Stopp"
                             Background="#C64242"
                             Style="{StaticResource VerktoylinjeKnapp}"
-                            Click="StoppKnapp_Click" />
+                            Click="StoppKnapp_Click"/>
 
-                    <Separator Margin="12,0" />
+                    <Separator Margin="12,0"/>
 
                     <Button x:Name="OpprettDoseKnapp"
                             Content="＋  Opprett dose"
                             Background="#347B98"
-                            Style="{StaticResource VerktoylinjeKnapp}" 
-                            Click="OpprettDoseKnapp_Click" />
+                            Style="{StaticResource VerktoylinjeKnapp}"
+                            Click="OpprettDoseKnapp_Click"/>
+                    <!-- ///////////////// AZO ///////////////// -->
+
+                    <Button x:Name="PasientInfoKnapp"
+                            Content="Pasientinformasjon"
+                            Background="#347B98"
+                            Style="{StaticResource VerktoylinjeKnapp}"
+                            Click="PasientInfoKnapp_Click"/>
+
+                    <!-- ///////////////// AZO ///////////////// -->
 
                 </StackPanel>
 
@@ -94,7 +122,7 @@
                     <TextBlock Text="Simulasjonstid:"
                                Foreground="#D9E9EF"
                                FontSize="14"
-                               VerticalAlignment="Center" />
+                               VerticalAlignment="Center"/>
                     <TextBlock x:Name="SimulasjonsTidText"
                                Text="00:00:00"
                                Foreground="White"
@@ -102,14 +130,14 @@
                                FontSize="22"
                                FontWeight="Bold"
                                Margin="8,0,20,0"
-                               VerticalAlignment="Center" />
+                               VerticalAlignment="Center"/>
                     <Border Background="#163F50"
                             CornerRadius="4"
                             Padding="10,5">
                         <TextBlock x:Name="TilstandText"
                                    Text="Ikke startet"
                                    Foreground="White"
-                                   FontWeight="SemiBold" />
+                                   FontWeight="SemiBold"/>
                     </Border>
                 </StackPanel>
             </DockPanel>
@@ -117,54 +145,54 @@
 
         <!-- Tidslinjen ligger i en egen kontroll -->
         <simulering:SimulasjonsTidslinje x:Name="Tidslinje"
-                                            Grid.Row="1"
-                                            Margin="10" />
+                                         Grid.Row="1"
+                                         Margin="10"/>
         <!-- REZA: Viser registrerte hendelser -->
         <GroupBox Grid.Row="2"
-          Header="Registrerte hendelser"
-          Margin="10,0,10,5">
+                  Header="Registrerte hendelser"
+                  Margin="10,0,10,5">
 
             <DataGrid x:Name="HendelserDataGrid"
-              AutoGenerateColumns="False"
-              IsReadOnly="True">
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True">
 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Simulasjonstid"
-                                Binding="{Binding Tidspunkt}"
-                                Width="150" />
+                                        Binding="{Binding Tidspunkt}"
+                                        Width="150"/>
 
                     <DataGridTextColumn Header="Hendelse"
-                                Binding="{Binding Beskrivelse}"
-                                Width="*" />
+                                        Binding="{Binding Beskrivelse}"
+                                        Width="*"/>
                 </DataGrid.Columns>
 
             </DataGrid>
         </GroupBox>
         <!-- REZA: Viser registrerte medikamenter under hendelseslisten -->
         <GroupBox Grid.Row="3"
-          Header="Registrerte medikamenter"
-          Margin="10,0,10,5">
+                  Header="Registrerte medikamenter"
+                  Margin="10,0,10,5">
 
             <DataGrid x:Name="MedikamenterDataGrid"
-              AutoGenerateColumns="False"
-              IsReadOnly="True">
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True">
 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Simulasjonstid"
-                                Binding="{Binding Simulasjonstid}"
-                                Width="120" />
+                                        Binding="{Binding Simulasjonstid}"
+                                        Width="120"/>
 
                     <DataGridTextColumn Header="Medikament"
-                                Binding="{Binding Medication}"
-                                Width="*" />
+                                        Binding="{Binding Medication}"
+                                        Width="*"/>
 
                     <DataGridTextColumn Header="Dose"
-                                Binding="{Binding Dose}"
-                                Width="100" />
+                                        Binding="{Binding Dose}"
+                                        Width="100"/>
 
                     <DataGridTextColumn Header="Doseform"
-                                Binding="{Binding DoseForm}"
-                                Width="120" />
+                                        Binding="{Binding DoseForm}"
+                                        Width="120"/>
                 </DataGrid.Columns>
 
             </DataGrid>
@@ -174,11 +202,11 @@
 
 
 <!-- ///////////////// simen ///////////////// -->
-    
-    
-    
-    
-    
+
+
+
+
+
 
 
 <!-- ///////////////// simen ///////////////// -->
