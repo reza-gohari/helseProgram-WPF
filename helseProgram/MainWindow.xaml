@@ -41,6 +41,16 @@
             <!-- Simen: Verktøylinje -->
             <RowDefinition Height="Auto"/>
 
+            
+            <!-- /////Reza, Rad for tidslinjen. -->
+            <RowDefinition Height="315" />
+
+            <!-- /////Reza, Rad for hendelsestabellen. -->
+            <RowDefinition Height="130" />
+
+            <!-- /////Reza, Rad for medikamenttabellen. -->
+            <RowDefinition Height="150" />
+
             <!-- REZA: Grafisk tidslinje -->
             <RowDefinition Height="315"/>
 
@@ -49,6 +59,7 @@
 
             <!-- REZA: Liste over medikamenter -->
             <RowDefinition Height="150"/>
+
         </Grid.RowDefinitions>
 
 

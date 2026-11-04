@@ -10,7 +10,7 @@
         Width="400"
         WindowStartupLocation="CenterOwner">
     <Grid>
-        <!-- REZA: Felt for å skrive en ny hendelse -->
+        <!-- /////Reza, Felt for ny hendelse. -->
         <StackPanel Margin="20">
             <TextBlock Text="Beskriv hendelsen:"
                FontWeight="Bold"
@@ -20,7 +20,7 @@
              Height="70"
              TextWrapping="Wrap"
              AcceptsReturn="True"/>
-            <!-- REZA: Knapp for å registrere hendelsen -->
+            <!-- /////Reza, Registreringsknapp. -->
             <Button x:Name="RegistrerHendelseKnapp"
                     Content="Registrer hendelse"
                     Click="RegistrerHendelseKnapp_Click"

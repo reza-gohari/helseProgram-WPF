@@ -21,10 +21,8 @@ public partial class DoseRegistrationWindow : Window
 
     private readonly ObservableCollection<RegisteredDose> registrerteDoser = new();
 
-    // ========== REZA START ==========
-    // Gjør registrerte doser tilgjengelige for MainWindow.
+    /////Reza, Gir MainWindow tilgang til dosene.
     public IReadOnlyList<RegisteredDose> RegistrerteDoser => registrerteDoser;
-    // ========== REZA SLUTT ==========
 
     private string stedForTablett = string.Empty;
     private bool stedErLast;
@@ -210,13 +208,12 @@ public partial class DoseRegistrationWindow : Window
             : "--";
         var kommentar = CommentTextBox.Text.Trim();
 
-        // ========== REZA START ==========
-        // Registrerer medikamentet og beholder feltet for simulasjonstid.
+        /////Reza, Simulasjonstiden settes i MainWindow.
         registrerteDoser.Add(new RegisteredDose(
             Medication: legemiddel,
             DoseForm: doseform,
             Simulasjonstid: "",
-                    // ========== REZA SLUTT ==========
+                    
                     Amount: "--",
             Dose: $"{dosetekst} {enhet}",
             Concentration: "--",
@@ -327,7 +324,7 @@ public partial class DoseRegistrationWindow : Window
 public sealed record RegisteredDose(
 
     string Medication,
-    string DoseForm, // REZA: Angir om dosen er infusjon, bolus osv.
+    string DoseForm,/////Reza, Infusjon, bolus eller tablett.
     string Amount,
     string Dose,
     string Concentration,
@@ -336,10 +333,9 @@ public sealed record RegisteredDose(
     string StartTime,
     DateTime StartDate,
     string Location,
-    // ========== REZA START ==========
-    // Simulasjonstid brukes til visning i MainWindow.
+    /////Reza, Simulasjonstid for visning.
     string Simulasjonstid,
-    // ========== REZA SLUTT ==========
+    
     string Comment);
 
 /////////////////////Ado////////////////////////
