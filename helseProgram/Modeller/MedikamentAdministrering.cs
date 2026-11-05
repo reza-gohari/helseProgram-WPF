@@ -5,7 +5,7 @@ public class MedikamentAdministrering
 {
     public int MedikamentAdministreringId { get; set; } // selvforklarende
 
-    public int MedikamentId { get; set; } // hvilke mediment som blir brukt
+    public int MedikamentId { get; set; } // hvilke medikament som blir brukt
 
     public int PasientId { get; set; } // pasient ID
 
@@ -24,6 +24,12 @@ public class MedikamentAdministrering
     public DateTime? EndeTid { get; set; }
 
     public string Kommentar { get; set; } = string.Empty;
+
+    public string Lokalisasjon { get; set; } = string.Empty; // Venstre eller høyre arm
+
+    public bool ErKontinuerlig { get; set; } // kontinuerlig eller ikke
+
+    public long? SimulasjonstidTicks { get; set; } // laster inn tiden til sim når man åpner Med meny.
 
     public Medikamenter Medikament { get; set; } = null!;
 

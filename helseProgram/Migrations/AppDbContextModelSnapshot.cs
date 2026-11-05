@@ -68,7 +68,14 @@ namespace helseProgram.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("ErKontinuerlig")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Kommentar")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Lokalisasjon")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -79,6 +86,9 @@ namespace helseProgram.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("SimSesjonsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("SimulasjonstidTicks")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("StartTid")
