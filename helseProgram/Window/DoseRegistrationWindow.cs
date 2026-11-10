@@ -7,7 +7,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using helseProgram.Data;
 using helseProgram.Modeller;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -19,10 +18,10 @@ public partial class DoseRegistrationWindow : Window
 {
     private const string velgLegemiddel = "Velg legemiddel...";
 
-    private readonly ObservableCollection<RegisteredDose> registrerteDoser = new();
+    private readonly ObservableCollection<MedikamentAdministrering> registrerteDoser = new();
 
     /////Reza, Gir MainWindow tilgang til dosene.
-    public IReadOnlyList<RegisteredDose> RegistrerteDoser => registrerteDoser;
+    public IReadOnlyList<MedikamentAdministrering> RegistrerteDoser => registrerteDoser;
 
     private string stedForTablett = string.Empty;
     private bool stedErLast;
@@ -34,7 +33,6 @@ public partial class DoseRegistrationWindow : Window
         FyllVarighetslister();
         OppdaterVarighet();
 
-        RegisteredDosesGrid.ItemsSource = registrerteDoser;
         DoseTextBox.Clear();
     }
 
@@ -155,14 +153,9 @@ public partial class DoseRegistrationWindow : Window
             return;
         }
 
-        var legemiddel = valgtMedikament.MedikamentNavn;
-        var medikamentId = valgtMedikament.MedikamentId;
-
         var doseform = HentValgtTekst(DoseFormComboBox);
         var dosetekst = DoseTextBox.Text.Trim();
         var klokkeslettTekst = StartTimeTextBox.Text.Trim();
-
-        
 
         if (string.IsNullOrWhiteSpace(doseform) || doseform == "Velg...")
         {
@@ -170,7 +163,7 @@ public partial class DoseRegistrationWindow : Window
             return;
         }
 
-        if (!ErGyldigDose(dosetekst, out _))
+        if (!ErGyldigDose(dosetekst, out var dose))
         {
             VisFeil(
                 "Skriv en gyldig dose større enn 0, for eksempel 1,5.",
@@ -198,43 +191,91 @@ public partial class DoseRegistrationWindow : Window
         }
 
         var enhet = HentValgtTekst(DoseUnitComboBox);
-        var administreringsmate = HentValgtTekst(AdministrationRouteComboBox);
-        var timer = HentValgtTekst(VarighetTime);
-        var minutter = HentValgtTekst(VarighetMinutt);
-        var varighet = doseform == "Infusjon"
-            ? KontinuerligCheckBox.IsChecked == true
-                ? "Kontinuerlig"
-                : $"{timer} t {minutter} min"
-            : "--";
-        var kommentar = CommentTextBox.Text.Trim();
+        var administreringsmate =
+            HentValgtTekst(AdministrationRouteComboBox);
 
-        /////Reza, Simulasjonstiden settes i MainWindow.
-        registrerteDoser.Add(new RegisteredDose(
-            Medication: legemiddel,
-            DoseForm: doseform,
-            Simulasjonstid: "",
-                    
-                    Amount: "--",
-            Dose: $"{dosetekst} {enhet}",
-            Concentration: "--",
-            Administration: administreringsmate == "Velg..."
-                ? "--"
-                : administreringsmate,
-            Duration: varighet,
-            StartTime: klokkeslett.ToString(
-                "HH:mm",
-                CultureInfo.InvariantCulture),
-            StartDate: dato.Date,
-            Location: stedErLast ||
-                string.IsNullOrWhiteSpace(LocationTextBox.Text)
+        var startTid = dato.Date.Add(klokkeslett.TimeOfDay);
+
+        var erKontinuerlig =
+            doseform == "Infusjon" &&
+            KontinuerligCheckBox.IsChecked == true;
+
+        DateTime? endeTid = null;
+
+        if (doseform == "Infusjon" && !erKontinuerlig)
+        {
+            var timer = (int)VarighetTime.SelectedItem;
+            var minutter = int.Parse(HentValgtTekst(VarighetMinutt));
+            var varighet = TimeSpan.FromMinutes(timer * 60 + minutter);
+
+            if (varighet > DateTime.MaxValue - startTid)
+            {
+                VisFeil("Velg en tidligere startdato.", StartDatePicker);
+                return;
+            }
+
+            endeTid = startTid.Add(varighet);
+        }
+
+        var administrering = new MedikamentAdministrering
+        {
+            MedikamentId = valgtMedikament.MedikamentId,
+            Medikament = valgtMedikament,
+            Dose = dose,
+            Enhet = enhet,
+            AdministreringsType = doseform,
+            AdministreringsMetode = administreringsmate,
+            StartTid = startTid,
+            EndeTid = endeTid,
+            ErKontinuerlig = erKontinuerlig,
+            Lokalisasjon = stedErLast
+                ? string.Empty
+                : LocationTextBox.Text.Trim(),
+            Kommentar = CommentTextBox.Text.Trim()
+        };
+
+        registrerteDoser.Add(administrering);
+
+        RegisteredDosesGrid.ItemsSource = registrerteDoser.Select(d =>
+        {
+            var varighetTekst = "--";
+
+            if (d.ErKontinuerlig)
+            {
+                varighetTekst = "Kontinuerlig";
+            }
+            else if (d.EndeTid is DateTime slutt)
+            {
+                var varighet = slutt - d.StartTid;
+
+                varighetTekst =
+                    $"{(int)varighet.TotalHours} t {varighet.Minutes:00} min";
+            }
+
+            return new
+            {
+                Medication = d.Medikament.MedikamentNavn,
+
+                Dose =
+                    $"{d.Dose.ToString(CultureInfo.GetCultureInfo("nb-NO"))} {d.Enhet}",
+
+                Concentration = "--",
+
+                Administration = d.AdministreringsMetode == "Velg..."
                     ? "--"
-                    : LocationTextBox.Text.Trim(),
-            Comment: string.IsNullOrWhiteSpace(kommentar)
-                ? "--"
-                : kommentar));
+                    : d.AdministreringsMetode,
+
+                Duration = varighetTekst,
+                StartTime = d.StartTid.ToString("HH:mm"),
+
+                Comment = string.IsNullOrWhiteSpace(d.Kommentar)
+                    ? "--"
+                    : d.Kommentar
+            };
+        }).ToList();
 
         RegisteredDosesGrid.ScrollIntoView(
-            registrerteDoser[registrerteDoser.Count - 1]);
+            RegisteredDosesGrid.Items[RegisteredDosesGrid.Items.Count - 1]);
 
         NullstillDose();
         KontinuerligCheckBox.IsChecked = false;
@@ -320,22 +361,3 @@ public partial class DoseRegistrationWindow : Window
     {
     }
 }
-
-public sealed record RegisteredDose(
-
-    string Medication,
-    string DoseForm,/////Reza, Infusjon, bolus eller tablett.
-    string Amount,
-    string Dose,
-    string Concentration,
-    string Administration,
-    string Duration,
-    string StartTime,
-    DateTime StartDate,
-    string Location,
-    /////Reza, Simulasjonstid for visning.
-    string Simulasjonstid,
-    
-    string Comment);
-
-/////////////////////Ado////////////////////////

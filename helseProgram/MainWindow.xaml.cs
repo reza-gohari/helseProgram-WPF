@@ -2,8 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Threading;
+using System.Linq;
+using helseProgram.Modeller;
 
 
 ///////////////// simen /////////////////
@@ -17,7 +20,9 @@ namespace helseProgram
         private readonly DispatcherTimer uiTimer;
 
         /////Reza, Doseliste for medikamenttabellen.
-        private readonly List<RegisteredDose> registrerteDoser = new();
+        ///Ado, oppdaterte listen fra DoseRegistration til MedikamentAdministerig
+        ///fra modeller. 
+        private readonly List<MedikamentAdministrering> registrerteDoser = new();
         
         public MainWindow()
         {
@@ -106,27 +111,40 @@ namespace helseProgram
             {
                 TimeSpan tid = klokke.SimulasjonsTid;
 
-                registrerteDoser.Add(dose with
-                {
-                    Simulasjonstid = tid.ToString(@"hh\:mm\:ss")
-                });
-                
+                dose.SimulasjonstidTicks = tid.Ticks;
+                registrerteDoser.Add(dose);
+
                 // Kontinuerlig infusjon registreres separat fra vanlig dose.
-                if (dose.DoseForm == "Infusjon" &&
-                    dose.Duration == "Kontinuerlig")
+                if (dose.AdministreringsType == "Infusjon" &&
+                    dose.ErKontinuerlig)
                 {
-                    Tidslinje.LeggTilInfusjon(dose.Medication, tid);
+                    Tidslinje.LeggTilInfusjon(
+                        dose.Medikament.MedikamentNavn,
+                        tid);
                 }
                 else
                 {
-                    // Vanlige doser vises som punkter på tidslinjen.
-                    Tidslinje.LeggTilDose(dose.Medication, tid);
+                    Tidslinje.LeggTilDose(
+                        dose.Medikament.MedikamentNavn,
+                        tid);
                 }
-
             }
 
             MedikamenterDataGrid.ItemsSource = null;
-            MedikamenterDataGrid.ItemsSource = registrerteDoser;
+
+            MedikamenterDataGrid.ItemsSource = registrerteDoser.Select(d => new
+            {
+                Simulasjonstid = TimeSpan.FromTicks(
+                    d.SimulasjonstidTicks.GetValueOrDefault())
+                    .ToString(@"hh\:mm\:ss"),
+
+                Medication = d.Medikament.MedikamentNavn,
+
+                Dose =
+                    $"{d.Dose.ToString(CultureInfo.GetCultureInfo("nb-NO"))} {d.Enhet}",
+
+                DoseForm = d.AdministreringsType
+            }).ToList();
         }
         /////Reza, Viser hendelsen i tabell og tidslinje
 
