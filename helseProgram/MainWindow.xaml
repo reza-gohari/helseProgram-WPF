@@ -95,7 +95,7 @@
                     <Separator Margin="12,0"/>
 
                     <Button x:Name="OpprettDoseKnapp"
-                            Content="＋  Opprett dose"
+                            Content="Medikament meny"
                             Background="#347B98"
                             Style="{StaticResource VerktoylinjeKnapp}"
                             Click="OpprettDoseKnapp_Click"/>
