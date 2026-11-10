@@ -100,7 +100,8 @@
                                 <ComboBoxItem Content="mg" />
                                 <ComboBoxItem Content="mcg" />
                                 <ComboBoxItem Content="ml" />
-                            </ComboBox>
+                                    <ComboBoxItem Content="mengde" />
+                                </ComboBox>
                         </Grid>
                     </StackPanel>
 
@@ -207,14 +208,13 @@
                           HeadersVisibility="Column"
                           GridLinesVisibility="All">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Middel" Binding="{Binding Medication}" Width="125" />
-                        <DataGridTextColumn Header="Mengde" Binding="{Binding Amount}" Width="60" />
-                        <DataGridTextColumn Header="Dose" Binding="{Binding Dose}" Width="70" />
+                            <DataGridTextColumn Header="Middel" Binding="{Binding Medication}" Width="125" />
+                            <DataGridTextColumn Header="Dose/Mengde" Binding="{Binding Dose}" Width="90" />
                         <DataGridTextColumn Header="Konsentrasjon" Binding="{Binding Concentration}" Width="90" />
                         <DataGridTextColumn Header="Administrasjon" Binding="{Binding Administration}" Width="105" />
                         <DataGridTextColumn Header="Varighet" Binding="{Binding Duration}" Width="80" />
                         <DataGridTextColumn Header="Starttid" Binding="{Binding StartTime}" Width="65" />
-                        <DataGridTextColumn Header="Kommentar" Binding="{Binding Comment}" Width="100" />
+                        <DataGridTextColumn Header="Kommentar" Binding="{Binding Comment}" Width="150" />
                     </DataGrid.Columns>
                 </DataGrid>
             </GroupBox>

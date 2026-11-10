@@ -20,7 +20,7 @@ public partial class DoseRegistrationWindow : Window
 
     private readonly ObservableCollection<MedikamentAdministrering> registrerteDoser = new();
 
-    /////Reza, Gir MainWindow tilgang til dosene.
+    /////Reza, Gir MainWindow tilgang til dosene
     public IReadOnlyList<MedikamentAdministrering> RegistrerteDoser => registrerteDoser;
 
     private string stedForTablett = string.Empty;

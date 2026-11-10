@@ -186,7 +186,7 @@
                                         Binding="{Binding Medication}"
                                         Width="*"/>
 
-                    <DataGridTextColumn Header="Dose"
+                    <DataGridTextColumn Header="Dose/Mengde"
                                         Binding="{Binding Dose}"
                                         Width="100"/>
 
